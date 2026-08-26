@@ -1,0 +1,4 @@
+"use client";
+import{createContext,useContext,useEffect,useMemo,useState}from"react";
+type Ctx={ids:string[];toggle:(id:string)=>void;has:(id:string)=>boolean};const C=createContext<Ctx|null>(null);
+export function WishlistProvider({children}:{children:React.ReactNode}){const[ids,setIds]=useState<string[]>([]);useEffect(()=>{try{setIds(JSON.parse(localStorage.getItem("cassy-wishlist")||"[]"))}catch{}},[]);useEffect(()=>{localStorage.setItem("cassy-wishlist",JSON.stringify(ids))},[ids]);const value=useMemo(()=>({ids,toggle:(id:string)=>setIds(v=>v.includes(id)?v.filter(x=>x!==id):[...v,id]),has:(id:string)=>ids.includes(id)}),[ids]);return <C.Provider value={value}>{children}</C.Provider>};export const useWishlist=()=>{const v=useContext(C);if(!v)throw Error("WishlistProvider missing");return v};

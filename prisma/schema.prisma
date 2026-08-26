@@ -1,0 +1,213 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  CUSTOMER
+  ADMIN
+}
+
+enum OrderStatus {
+  NEW
+  CONFIRMED
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  phone     String?
+  password  String? // bcrypt hash; null for admin-only env-based accounts
+  role      Role     @default(CUSTOMER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  orders              Order[]
+  wishlist            Wishlist[]
+  carts               Cart[]
+  reviews             Review[]
+  passwordResetTokens PasswordResetToken[]
+}
+
+// Single-use, short-lived tokens for the customer "forgot password" email flow.
+// The raw token is only ever emailed to the user; we store a SHA-256 hash so a
+// DB read can't be used to reset someone else's password.
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+}
+
+model Category {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  slug      String   @unique
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  products Product[]
+}
+
+model Product {
+  id           String   @id @default(cuid())
+  name         String
+  slug         String   @unique
+  description  String   @default("")
+  price        Int
+  salePrice    Int?
+  categoryId   String
+  category     Category @relation(fields: [categoryId], references: [id])
+  stock        Int      @default(0)
+  sizes        String[] @default([])
+  colors       String[] @default([])
+  isActive     Boolean  @default(true)
+  isNew        Boolean  @default(false)
+  isBestSeller Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  images     ProductImage[]
+  orderItems OrderItem[]
+  wishlist   Wishlist[]
+  cartItems  CartItem[]
+  reviews    Review[]
+
+  @@index([categoryId])
+  @@index([isActive])
+}
+
+model ProductImage {
+  id        String   @id @default(cuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  url       String
+  position  Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([productId])
+}
+
+model Order {
+  id          String      @id @default(cuid())
+  code        String      @unique
+  userId      String?
+  user        User?       @relation(fields: [userId], references: [id])
+  customer    String
+  phone       String
+  address     String
+  social      String      @default("")
+  note        String      @default("")
+  deliveryFee Int         @default(0)
+  total       Int
+  status      OrderStatus @default(NEW)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  items OrderItem[]
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  name      String
+  image     String  @default("")
+  size      String
+  color     String  @default("")
+  qty       Int
+  price     Int
+
+  @@index([orderId])
+  @@index([productId])
+}
+
+model Wishlist {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, productId])
+}
+
+model Cart {
+  id        String     @id @default(cuid())
+  userId    String
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  items     CartItem[]
+}
+
+model CartItem {
+  id        String  @id @default(cuid())
+  cartId    String
+  cart      Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  size      String
+  qty       Int
+
+  @@unique([cartId, productId, size])
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  rating    Int
+  comment   String   @default("")
+  createdAt DateTime @default(now())
+
+  @@index([productId])
+}
+
+// Small, editable homepage visuals (hero + style-edit section), managed from
+// /admin/homepage instead of being hardcoded in the page component.
+model SiteContent {
+  id              String   @id @default(cuid())
+  key             String   @unique // always "homepage" for now — a singleton row
+  heroImage       String?
+  styleEditImage1 String?
+  styleEditImage2 String?
+  updatedAt       DateTime @updatedAt
+}
+
+// Editable store contact/info text shown across the storefront (footer, header
+// banner, homepage), managed from /admin/settings.
+model ShopSettings {
+  id        String   @id @default(cuid())
+  key       String   @unique // always "shop" for now — a singleton row
+  name      String
+  phone     String
+  address   String
+  delivery  String
+  instagram String
+  facebook  String
+  hours     String
+  updatedAt DateTime @updatedAt
+}
