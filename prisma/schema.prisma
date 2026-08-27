@@ -118,6 +118,14 @@ model Order {
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
 
+  // QPay-via-Wire online payment tracking. `paid` is the source of truth for
+  // whether money has actually moved — only the /api/webhooks/wire handler
+  // (after verifying Wire's signature) may set it true. `status` above stays
+  // a separate, admin-managed fulfillment workflow (NEW → CONFIRMED → ...).
+  paid                Boolean  @default(false)
+  wirePaymentIntentId String?  @unique
+  wireCheckoutUrl     String?
+
   items OrderItem[]
 
   @@index([status])

@@ -23,13 +23,20 @@ export default function Checkout() {
     setError("");
 
     const form = new FormData(e.currentTarget);
+    const instagram = String(form.get("instagram") || "").trim();
+    const facebook = String(form.get("facebook") || "").trim();
+    if (!instagram && !facebook) {
+      setPending(false);
+      setError("Instagram эсвэл Facebook нэрийн аль нэгийг бөглөнө үү.");
+      return;
+    }
+
     const result = await placeOrderAction(
       {
-        customer: String(form.get("customer") || ""),
         phone: String(form.get("phone") || ""),
         address: String(form.get("address") || ""),
-        instagram: String(form.get("instagram") || "").trim(),
-        facebook: String(form.get("facebook") || "").trim(),
+        instagram,
+        facebook,
         note: String(form.get("note") || ""),
       },
       items.map((item) => ({ productId: item.product.id, size: item.size, qty: item.qty }))
@@ -40,9 +47,13 @@ export default function Checkout() {
       setError(result.message);
       return;
     }
+    clear();
+    if (result.checkoutUrl) {
+      window.location.href = result.checkoutUrl;
+      return;
+    }
     setOrderId(result.orderCode);
     setOk(true);
-    clear();
   }
 
   if (ok) {
@@ -63,18 +74,20 @@ export default function Checkout() {
       <form onSubmit={submit} className="card p-6 md:p-8">
         <h1 className="serif text-4xl">Delivery details</h1>
         <div className="mt-7 grid gap-4 md:grid-cols-2">
-          <input name="customer" required className="input" placeholder="Овог нэр" />
-          <input name="phone" required className="input" placeholder="Утасны дугаар" />
+          <input name="phone" required className="input md:col-span-2" placeholder="Утасны дугаар" />
           <input name="address" required className="input md:col-span-2" placeholder="Дүүрэг, хороо, байр, тоот" />
           <input name="instagram" className="input" placeholder="Instagram нэр" />
           <input name="facebook" className="input" placeholder="Facebook нэр" />
-          <textarea name="note" className="input min-h-28 md:col-span-2" placeholder="Нэмэлт тайлбар" />
+          <p className="-mt-2 text-xs text-zinc-500 md:col-span-2">Instagram эсвэл Facebook нэрийн аль нэгийг заавал бөглөнө үү.</p>
+          <textarea name="note" className="input min-h-28 md:col-span-2" placeholder="Нэмэлт тайлбар (заавал биш)" />
         </div>
 
         <h2 className="mt-8 font-bold">Төлбөр</h2>
         <div className="mt-3 rounded-2xl border border-dashed border-[#cfaabc] bg-[#fdf6f9] p-5">
-          <p className="font-bold">QPay integration placeholder</p>
-          <p className="mt-1 text-sm text-zinc-500">Энд өөрийн QPay API-г холбоход зориулсан хэсэг үлдээсэн.</p>
+          <p className="font-bold">QPay-ээр төлөх</p>
+          <p className="mt-1 text-sm text-zinc-500">
+            Захиалгаа баталгаажуулмагц QPay төлбөрийн хуудас руу шилжинэ.
+          </p>
         </div>
 
         {error && <p className="mt-4 text-sm font-semibold text-red-600">{error}</p>}

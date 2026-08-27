@@ -2,22 +2,27 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
 import { shopInfo } from "@/lib/shop-info";
 import { getCustomerSession } from "@/lib/customer-auth";
+import { createPaymentIntent, createCheckoutSession } from "@/lib/wire";
 
 export type CheckoutCartItem = { productId: string; size: string; qty: number };
 
 export type CheckoutResult =
-  | { ok: true; orderCode: string }
+  | { ok: true; orderCode: string; checkoutUrl?: string }
   | { ok: false; message: string };
 
 export async function placeOrderAction(
-  customer: { customer: string; phone: string; address: string; instagram: string; facebook: string; note: string },
+  customer: { phone: string; address: string; instagram: string; facebook: string; note: string },
   cartItems: CheckoutCartItem[]
 ): Promise<CheckoutResult> {
   if (!cartItems.length) return { ok: false, message: "Сагс хоосон байна." };
-  if (!customer.customer.trim() || !customer.phone.trim() || !customer.address.trim()) {
-    return { ok: false, message: "Овог нэр, утас, хаягаа бүрэн бөглөнө үү." };
+  if (!customer.phone.trim() || !customer.address.trim()) {
+    return { ok: false, message: "Утас, хаягаа бүрэн бөглөнө үү." };
+  }
+  if (!customer.instagram.trim() && !customer.facebook.trim()) {
+    return { ok: false, message: "Instagram эсвэл Facebook нэрийн аль нэгийг бөглөнө үү." };
   }
 
   const productIds = [...new Set(cartItems.map((i) => i.productId))];
@@ -54,6 +59,7 @@ export async function placeOrderAction(
   const social = [customer.instagram && `IG: ${customer.instagram}`, customer.facebook && `FB: ${customer.facebook}`]
     .filter(Boolean)
     .join(" • ");
+  const customerLabel = customer.instagram.trim() ? `@${customer.instagram.trim()}` : `@${customer.facebook.trim()}`;
 
   const session = await getCustomerSession();
 
@@ -63,7 +69,7 @@ export async function placeOrderAction(
         data: {
           code,
           userId: session?.userId,
-          customer: customer.customer.trim(),
+          customer: customerLabel,
           phone: customer.phone.trim(),
           address: customer.address.trim(),
           social,
@@ -110,5 +116,38 @@ export async function placeOrderAction(
   revalidatePath("/admin/orders");
   for (const p of products) revalidatePath(`/products/${p.slug}`);
 
-  return { ok: true, orderCode: code };
+  // The order (and its stock decrement) is already committed above regardless
+  // of what happens next — QPay is an additive online-payment option on top of
+  // the existing COD/manual-transfer flow, not a replacement for it. If Wire
+  // isn't configured, or the account/API call fails for any reason (e.g. no
+  // connector attached yet on Wire's side), we fall back to the plain "order
+  // placed, we'll contact you" flow instead of losing the sale.
+  let checkoutUrl: string | undefined;
+  if (process.env.WIRE_API_KEY) {
+    try {
+      const intent = await createPaymentIntent({
+        amountMnt: total,
+        description: `Cassy Shop захиалга ${code}`,
+        orderCode: code,
+      });
+      const h = await headers();
+      const protocol = process.env.NODE_ENV === "production" ? "https" : "http";
+      const origin = `${protocol}://${h.get("host")}`;
+      const wireSession = await createCheckoutSession({
+        paymentIntentId: intent.id,
+        successUrl: `${origin}/checkout/success?order=${code}`,
+        cancelUrl: `${origin}/checkout`,
+        orderCode: code,
+      });
+      await prisma.order.update({
+        where: { code },
+        data: { wirePaymentIntentId: intent.id, wireCheckoutUrl: wireSession.url },
+      });
+      checkoutUrl = wireSession.url;
+    } catch (err) {
+      console.error("Wire checkout creation failed, falling back to COD flow:", err);
+    }
+  }
+
+  return { ok: true, orderCode: code, checkoutUrl };
 }

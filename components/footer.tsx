@@ -65,9 +65,6 @@ export default function Footer({ shopInfo }: { shopInfo: ShopInfo }) {
       </div>
       <div className="flex flex-col items-center gap-2 border-t border-white/10 py-5 text-center text-xs text-white/50 md:flex-row md:justify-between">
         <span>© 2026 Cassy Online Shop. All rights reserved.</span>
-        <Link href="/admin/login" className="text-white/40 hover:text-white/70">
-          Админ
-        </Link>
       </div>
     </footer>
   );
