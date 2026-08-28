@@ -70,6 +70,10 @@ export async function createPaymentIntent(params: {
   });
 }
 
+export async function getPaymentIntent(paymentIntentId: string): Promise<WirePaymentIntent> {
+  return wireFetch<WirePaymentIntent>(`/v1/payment_intents/${paymentIntentId}`, { method: "GET" });
+}
+
 export type WireCheckoutSession = {
   id: string;
   object: "checkout.session";
