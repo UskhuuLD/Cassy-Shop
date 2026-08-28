@@ -39,6 +39,17 @@ function readListField(formData: FormData, key: string): string[] {
     .filter(Boolean);
 }
 
+// Image URLs are submitted as repeated `images` form entries (one per
+// uploaded image) rather than comma-joined, because a data: URL — used as a
+// fallback when Cloudinary isn't configured — always contains its own comma
+// ("data:image/jpeg;base64,<payload>"), which would corrupt a joined/split
+// list. See product-form.tsx's use of formData.append("images", url).
+function readImageUrls(formData: FormData): string[] {
+  return formData
+    .getAll("images")
+    .filter((v): v is string => typeof v === "string" && v.length > 0);
+}
+
 function parseProductForm(formData: FormData) {
   return productSchema.safeParse({
     name: formData.get("name"),
@@ -49,7 +60,7 @@ function parseProductForm(formData: FormData) {
     stock: formData.get("stock"),
     sizes: readListField(formData, "sizes"),
     colors: readListField(formData, "colors"),
-    images: readListField(formData, "images"),
+    images: readImageUrls(formData),
     isActive: formData.get("isActive") === "on" || formData.get("isActive") === "true",
     isNew: formData.get("isNew") === "on" || formData.get("isNew") === "true",
     isBestSeller: formData.get("isBestSeller") === "on" || formData.get("isBestSeller") === "true",

@@ -50,7 +50,8 @@ export default function ProductForm({
   async function submit(formData: FormData) {
     setPending(true);
     setError("");
-    formData.set("images", images.join(","));
+    formData.delete("images");
+    for (const url of images) formData.append("images", url);
     const result = product ? await updateProductAction(product.id, formData) : await createProductAction(formData);
     setPending(false);
     if (!result.ok) {
