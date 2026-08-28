@@ -25,6 +25,7 @@ type OrderRow = {
   createdAt: Date;
   total: number;
   status: OrderStatus;
+  pickup: boolean;
   paid: boolean;
   wirePaymentIntentId: string | null;
   items: { id: string; name: string; image: string; size: string; qty: number }[];
@@ -79,7 +80,12 @@ export default function OrdersTable({ orders }: { orders: OrderRow[] }) {
               <td className="p-4">{order.phone}</td>
               <td className="max-w-48 p-4">{order.social || "—"}</td>
               <td className="max-w-56 p-4">
-                {order.address}
+                {order.pickup && (
+                  <span className="mb-1 inline-block rounded-full bg-[#f2dbe4] px-3 py-1 text-xs font-bold text-[#7a3352]">
+                    Очиж авах
+                  </span>
+                )}
+                <p>{order.address}</p>
                 {order.note ? <p className="mt-1 text-xs text-zinc-500">Тайлбар: {order.note}</p> : null}
               </td>
               <td className="p-4">

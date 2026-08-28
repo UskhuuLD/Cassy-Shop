@@ -13,7 +13,8 @@ export default function Checkout() {
   const [orderId, setOrderId] = useState("");
   const [error, setError] = useState("");
   const [pending, setPending] = useState(false);
-  const deliveryFee = total >= shopInfo.freeDeliveryThreshold ? 0 : shopInfo.deliveryFee;
+  const [pickup, setPickup] = useState(false);
+  const deliveryFee = pickup ? 0 : total >= shopInfo.freeDeliveryThreshold ? 0 : shopInfo.deliveryFee;
   const grandTotal = total + deliveryFee;
 
   async function submit(e: FormEvent<HTMLFormElement>) {
@@ -38,6 +39,7 @@ export default function Checkout() {
         instagram,
         facebook,
         note: String(form.get("note") || ""),
+        pickup,
       },
       items.map((item) => ({ productId: item.product.id, size: item.size, qty: item.qty }))
     );
@@ -82,12 +84,30 @@ export default function Checkout() {
           <textarea name="note" className="input min-h-28 md:col-span-2" placeholder="Нэмэлт тайлбар (заавал биш)" />
         </div>
 
-        <h2 className="mt-8 font-bold">Төлбөр</h2>
-        <div className="mt-3 rounded-2xl border border-dashed border-[#cfaabc] bg-[#fdf6f9] p-5">
-          <p className="font-bold">QPay-ээр төлөх</p>
-          <p className="mt-1 text-sm text-zinc-500">
-            Захиалгаа баталгаажуулмагц QPay төлбөрийн хуудас руу шилжинэ.
-          </p>
+        <h2 className="mt-8 font-bold">Хүргэлт</h2>
+        <div className="mt-3 grid gap-3 sm:grid-cols-2">
+          <label
+            className={`cursor-pointer rounded-2xl border p-5 transition ${
+              !pickup ? "border-[#c9536f] bg-[#fdf6f9]" : "border-[#eadde3]"
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              <input type="radio" name="delivery-method" checked={!pickup} onChange={() => setPickup(false)} />
+              <p className="font-bold">Хүргэлттэй — QPay-ээр төлөх</p>
+            </div>
+            <p className="mt-1 text-sm text-zinc-500">Захиалгаа баталгаажуулмагц QPay төлбөрийн хуудас руу шилжинэ.</p>
+          </label>
+          <label
+            className={`cursor-pointer rounded-2xl border p-5 transition ${
+              pickup ? "border-[#c9536f] bg-[#fdf6f9]" : "border-[#eadde3]"
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              <input type="radio" name="delivery-method" checked={pickup} onChange={() => setPickup(true)} />
+              <p className="font-bold">Очиж авах — хүргэлтгүй</p>
+            </div>
+            <p className="mt-1 text-sm text-zinc-500">Хүргэлтийн төлбөргүй. Дэлгүүрт очиж бараагаа авна.</p>
+          </label>
         </div>
 
         {error && <p className="mt-4 text-sm font-semibold text-red-600">{error}</p>}
@@ -121,7 +141,7 @@ export default function Checkout() {
           </div>
           <div className="flex justify-between">
             <span>Хүргэлт</span>
-            <span>{deliveryFee ? money(deliveryFee) : "Үнэгүй"}</span>
+            <span>{pickup ? "Очиж авах" : deliveryFee ? money(deliveryFee) : "Үнэгүй"}</span>
           </div>
           <div className="flex justify-between pt-2 text-base font-bold">
             <span>Нийт</span>

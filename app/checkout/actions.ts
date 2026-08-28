@@ -14,7 +14,7 @@ export type CheckoutResult =
   | { ok: false; message: string };
 
 export async function placeOrderAction(
-  customer: { phone: string; address: string; instagram: string; facebook: string; note: string },
+  customer: { phone: string; address: string; instagram: string; facebook: string; note: string; pickup: boolean },
   cartItems: CheckoutCartItem[]
 ): Promise<CheckoutResult> {
   if (!cartItems.length) return { ok: false, message: "Сагс хоосон байна." };
@@ -52,7 +52,7 @@ export async function placeOrderAction(
     const product = productMap.get(item.productId)!;
     return sum + (product.salePrice ?? product.price) * item.qty;
   }, 0);
-  const deliveryFee = subtotal >= shopInfo.freeDeliveryThreshold ? 0 : shopInfo.deliveryFee;
+  const deliveryFee = customer.pickup ? 0 : subtotal >= shopInfo.freeDeliveryThreshold ? 0 : shopInfo.deliveryFee;
   const total = subtotal + deliveryFee;
   const code = `CS-${Date.now().toString().slice(-8)}`;
 
@@ -74,6 +74,7 @@ export async function placeOrderAction(
           address: customer.address.trim(),
           social,
           note: customer.note.trim(),
+          pickup: customer.pickup,
           deliveryFee,
           total,
           items: {
@@ -123,7 +124,7 @@ export async function placeOrderAction(
   // connector attached yet on Wire's side), we fall back to the plain "order
   // placed, we'll contact you" flow instead of losing the sale.
   let checkoutUrl: string | undefined;
-  if (process.env.WIRE_API_KEY) {
+  if (process.env.WIRE_API_KEY && !customer.pickup) {
     try {
       const intent = await createPaymentIntent({
         amountMnt: total,

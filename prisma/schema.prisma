@@ -112,6 +112,7 @@ model Order {
   address     String
   social      String      @default("")
   note        String      @default("")
+  pickup      Boolean     @default(false)
   deliveryFee Int         @default(0)
   total       Int
   status      OrderStatus @default(NEW)
