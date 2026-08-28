@@ -108,7 +108,7 @@ export default async function Home() {
         <div className="rounded-[36px] border border-[#eadde3] bg-white p-8 text-center md:p-14">
           <Instagram className="mx-auto" />
           <p className="eyebrow mt-4">FOLLOW OUR DAILY DROPS</p>
-          <h2 className="serif mt-3 text-4xl">@{shopInfo.instagram}</h2>
+          <h2 className="serif mt-3 break-words text-2xl sm:text-3xl md:text-4xl">@{shopInfo.instagram}</h2>
           <p className="mx-auto mt-4 max-w-xl text-zinc-500">
             Шинэ бараа, үнэ болон бодит бичлэгүүдийг Instagram-аас хамгийн түрүүнд хараарай.
           </p>
