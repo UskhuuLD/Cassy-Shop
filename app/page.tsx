@@ -97,9 +97,6 @@ export default async function Home() {
               <br />
               and confident.
             </h2>
-            <p className="mt-5 max-w-md leading-7 text-zinc-600">
-              Instagram дээрх танай сонголтуудыг web shop-д зориулсан цэвэрхэн каталог болгон шинэчиллээ.
-            </p>
             <Link href="/products" className="btn btn-dark mt-7">
               COLLECTION ҮЗЭХ
             </Link>
