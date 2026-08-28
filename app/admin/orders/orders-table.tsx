@@ -25,8 +25,20 @@ type OrderRow = {
   createdAt: Date;
   total: number;
   status: OrderStatus;
+  paid: boolean;
+  wirePaymentIntentId: string | null;
   items: { id: string; name: string; image: string; size: string; qty: number }[];
 };
+
+function PaymentBadge({ paid, wirePaymentIntentId }: { paid: boolean; wirePaymentIntentId: string | null }) {
+  if (!wirePaymentIntentId) {
+    return <span className="rounded-full bg-zinc-100 px-3 py-1 text-xs font-bold text-zinc-500">Гараар</span>;
+  }
+  if (paid) {
+    return <span className="rounded-full bg-[#e8f5e9] px-3 py-1 text-xs font-bold text-[#2e7d32]">Төлөгдсөн</span>;
+  }
+  return <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700">Хүлээгдэж буй</span>;
+}
 
 export default function OrdersTable({ orders }: { orders: OrderRow[] }) {
   const [rows, setRows] = useState(orders);
@@ -52,7 +64,7 @@ export default function OrdersTable({ orders }: { orders: OrderRow[] }) {
       <table className="w-full min-w-[1180px] text-left text-sm">
         <thead className="bg-[#f9edf2]">
           <tr>
-            {["Дугаар", "Хэрэглэгч", "Утас", "Social", "Хаяг", "Бараа", "Огноо", "Дүн", "Статус", ""].map((label) => (
+            {["Дугаар", "Хэрэглэгч", "Утас", "Social", "Хаяг", "Бараа", "Огноо", "Дүн", "Төлбөр", "Статус", ""].map((label) => (
               <th className="p-4" key={label}>
                 {label}
               </th>
@@ -88,6 +100,9 @@ export default function OrdersTable({ orders }: { orders: OrderRow[] }) {
               </td>
               <td className="whitespace-nowrap p-4">{new Date(order.createdAt).toLocaleString("mn-MN")}</td>
               <td className="whitespace-nowrap p-4 font-bold">{money(order.total)}</td>
+              <td className="p-4">
+                <PaymentBadge paid={order.paid} wirePaymentIntentId={order.wirePaymentIntentId} />
+              </td>
               <td className="p-4">
                 <select
                   className="rounded-full border border-[#eadde3] px-3 py-2"
