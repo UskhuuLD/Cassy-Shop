@@ -93,9 +93,9 @@ export default function Checkout() {
           >
             <div className="flex items-center gap-2">
               <input type="radio" name="delivery-method" checked={!pickup} onChange={() => setPickup(false)} />
-              <p className="font-bold">Хүргэлттэй — QPay-ээр төлөх</p>
+              <p className="font-bold">Хүргэлттэй</p>
             </div>
-            <p className="mt-1 text-sm text-zinc-500">Захиалгаа баталгаажуулмагц QPay төлбөрийн хуудас руу шилжинэ.</p>
+            <p className="mt-1 text-sm text-zinc-500">Хүргэлтийн төлбөр нэмэгдэнэ. Захиалгаа баталгаажуулмагц QPay төлбөрийн хуудас руу шилжинэ.</p>
           </label>
           <label
             className={`cursor-pointer rounded-2xl border p-5 transition ${
@@ -104,9 +104,12 @@ export default function Checkout() {
           >
             <div className="flex items-center gap-2">
               <input type="radio" name="delivery-method" checked={pickup} onChange={() => setPickup(true)} />
-              <p className="font-bold">Очиж авах — хүргэлтгүй</p>
+              <p className="font-bold">Очиж авах</p>
             </div>
-            <p className="mt-1 text-sm text-zinc-500">Хүргэлтийн төлбөргүй. Дэлгүүрт очиж бараагаа авна.</p>
+            <p className="mt-1 text-sm text-zinc-500">
+              Хүргэлтийн төлбөргүй, дэлгүүрт очиж бараагаа авна. Захиалгаа баталгаажуулмагц QPay төлбөрийн хуудас руу
+              шилжинэ.
+            </p>
           </label>
         </div>
 

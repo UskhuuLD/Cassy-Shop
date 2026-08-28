@@ -124,7 +124,7 @@ export async function placeOrderAction(
   // connector attached yet on Wire's side), we fall back to the plain "order
   // placed, we'll contact you" flow instead of losing the sale.
   let checkoutUrl: string | undefined;
-  if (process.env.WIRE_API_KEY && !customer.pickup) {
+  if (process.env.WIRE_API_KEY) {
     try {
       const intent = await createPaymentIntent({
         amountMnt: total,
