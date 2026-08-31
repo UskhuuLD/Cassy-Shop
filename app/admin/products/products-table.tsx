@@ -101,10 +101,10 @@ export default function ProductsAdmin({
 
   return (
     <>
-      <div className="flex items-center justify-between">
-        <h1 className="serif text-5xl">Бараанууд</h1>
-        <button onClick={openAdd} className="btn btn-dark">
-          <Plus size={18} /> Бараа нэмэх
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <h1 className="serif text-3xl sm:text-4xl md:text-5xl">Бараанууд</h1>
+        <button onClick={openAdd} className="btn btn-dark self-start !px-4 !py-2 text-sm sm:self-auto">
+          <Plus size={16} /> Бараа нэмэх
         </button>
       </div>
 
