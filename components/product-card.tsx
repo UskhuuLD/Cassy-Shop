@@ -12,7 +12,17 @@ export default function ProductCard({ p }: { p: PublicProduct }) {
   const soldOut = p.stock <= 0;
   const displayPrice = p.salePrice ?? p.price;
 
-  const badge = soldOut ? "SOLD OUT" : p.salePrice ? "SALE" : p.isBestSeller ? "BESTSELLER" : p.isNew ? "NEW" : null;
+  const badge = p.isComingSoon
+    ? "ТУН УДАХГҮЙ"
+    : soldOut
+      ? "SOLD OUT"
+      : p.salePrice
+        ? "SALE"
+        : p.isBestSeller
+          ? "BESTSELLER"
+          : p.isNew
+            ? "NEW"
+            : null;
 
   return (
     <article className="group">
@@ -25,7 +35,13 @@ export default function ProductCard({ p }: { p: PublicProduct }) {
         {badge && (
           <span
             className={`absolute left-3 top-3 rounded-full px-3 py-1 text-[10px] font-bold tracking-wider ${
-              soldOut ? "bg-[#2b2027] text-white" : badge === "SALE" ? "bg-[#c9536f] text-white" : "bg-white"
+              p.isComingSoon
+                ? "bg-[#a76f83] text-white"
+                : soldOut
+                  ? "bg-[#2b2027] text-white"
+                  : badge === "SALE"
+                    ? "bg-[#c9536f] text-white"
+                    : "bg-white"
             }`}
           >
             {badge}

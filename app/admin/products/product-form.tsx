@@ -153,6 +153,9 @@ export default function ProductForm({
           <label className="flex items-center gap-2 text-sm font-semibold">
             <input type="checkbox" name="isBestSeller" defaultChecked={product?.isBestSeller} /> BEST SELLER badge
           </label>
+          <label className="flex items-center gap-2 text-sm font-semibold">
+            <input type="checkbox" name="isComingSoon" defaultChecked={product?.isComingSoon} /> Тун удахгүй badge
+          </label>
         </div>
 
         {error && <p className="text-sm font-semibold text-red-600 md:col-span-2">{error}</p>}

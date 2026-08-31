@@ -64,6 +64,7 @@ function parseProductForm(formData: FormData) {
     isActive: formData.get("isActive") === "on" || formData.get("isActive") === "true",
     isNew: formData.get("isNew") === "on" || formData.get("isNew") === "true",
     isBestSeller: formData.get("isBestSeller") === "on" || formData.get("isBestSeller") === "true",
+    isComingSoon: formData.get("isComingSoon") === "on" || formData.get("isComingSoon") === "true",
   });
 }
 
@@ -91,6 +92,7 @@ export async function createProductAction(formData: FormData): Promise<ActionRes
       isActive: data.isActive,
       isNew: data.isNew,
       isBestSeller: data.isBestSeller,
+      isComingSoon: data.isComingSoon,
       images: { create: data.images.map((url, position) => ({ url, position })) },
     },
   });
@@ -129,6 +131,7 @@ export async function updateProductAction(id: string, formData: FormData): Promi
         isActive: data.isActive,
         isNew: data.isNew,
         isBestSeller: data.isBestSeller,
+      isComingSoon: data.isComingSoon,
         images: { create: data.images.map((url, position) => ({ url, position })) },
       },
     }),

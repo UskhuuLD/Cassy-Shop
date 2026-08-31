@@ -78,6 +78,7 @@ model Product {
   isActive     Boolean  @default(true)
   isNew        Boolean  @default(false)
   isBestSeller Boolean  @default(false)
+  isComingSoon Boolean  @default(false)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
