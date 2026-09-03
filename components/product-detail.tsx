@@ -69,7 +69,6 @@ export default function ProductDetail({ p }: { p: PublicProduct }) {
               <>✓ Үлдэгдэл: {p.stock} ширхэг</>
             )}
           </p>
-          <p className="mt-2">✓ QPay холболтын placeholder бэлэн</p>
         </div>
 
         {p.sizes.length > 0 && (

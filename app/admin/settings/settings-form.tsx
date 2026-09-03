@@ -36,11 +36,6 @@ export default function SettingsForm({ initial }: { initial: ShopInfo }) {
       <button onClick={save} disabled={saving} className="btn btn-dark md:col-span-2 disabled:opacity-50">
         {saving ? "Хадгалж байна..." : saved ? "ХАДГАЛАГДЛАА ✓" : "ХАДГАЛАХ"}
       </button>
-      <p className="text-sm text-zinc-500 md:col-span-2">
-        Эдгээр утгууд дэлгүүрийн бүх хуудсанд (нүүр, header, footer) шууд харагдана. Хүргэлтийн тооцооны дүн (₮) зэрэг
-        тоон утгыг өөрчлөхийн тулд <code className="rounded bg-[#f9edf2] px-1.5 py-0.5">lib/shop-info.ts</code>{" "}
-        файлыг код дээр засна уу.
-      </p>
     </div>
   );
 }
