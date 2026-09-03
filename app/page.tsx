@@ -76,11 +76,9 @@ export default async function Home() {
             Одоогоор бараа алга. Admin хэсгээс эхний бараагаа нэмнэ үү.
           </div>
         ) : (
-          <div className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] md:grid md:grid-cols-3 md:gap-5 md:overflow-visible lg:grid-cols-4 [&::-webkit-scrollbar]:hidden">
+          <div className="grid grid-cols-2 gap-5 md:grid-cols-3 lg:grid-cols-4">
             {products.map((p) => (
-              <div key={p.id} className="w-[45%] flex-none snap-start md:w-auto">
-                <ProductCard p={p} />
-              </div>
+              <ProductCard key={p.id} p={p} />
             ))}
           </div>
         )}
