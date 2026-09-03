@@ -1,48 +1,73 @@
 "use client";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useCart } from "./cart-context";
 import type { PublicProduct } from "@/lib/products";
 
 const money = (n: number) => new Intl.NumberFormat("mn-MN").format(n) + "₮";
 
 export default function ProductDetail({ p }: { p: PublicProduct }) {
+  const images = p.images.length ? p.images : [{ id: "fallback", url: "/products/product-1.jpg", color: "" }];
+
   const [size, setSize] = useState(p.sizes[0] || "ONE SIZE");
   const [color, setColor] = useState(p.colors[0] || "");
-  const [manualImage, setManualImage] = useState<string | null>(null);
+  const [activeIndex, setActiveIndex] = useState(() => {
+    const idx = images.findIndex((img) => img.color === (p.colors[0] || ""));
+    return idx !== -1 ? idx : 0;
+  });
   const [done, setDone] = useState(false);
   const { add } = useCart();
   const soldOut = p.stock <= 0;
+  const scrollRef = useRef<HTMLDivElement>(null);
 
-  const fallbackImage = p.images[0]?.url || "/products/product-1.jpg";
-  // A customer clicking a thumbnail directly always wins; otherwise the
-  // selected color's tagged photo (if any) drives the main image.
-  const colorImage = color ? p.images.find((img) => img.color === color)?.url : undefined;
-  const activeImage = manualImage ?? colorImage ?? fallbackImage;
+  function scrollToIndex(index: number) {
+    const el = scrollRef.current?.children[index] as HTMLElement | undefined;
+    el?.scrollIntoView({ behavior: "smooth", inline: "start", block: "nearest" });
+    setActiveIndex(index);
+  }
 
   function selectColor(c: string) {
     setColor(c);
-    setManualImage(null); // let the color choice drive the photo again
+    const idx = images.findIndex((img) => img.color === c);
+    if (idx !== -1) scrollToIndex(idx);
   }
+
+  // Keeps the highlighted thumbnail in sync when the customer swipes the
+  // gallery by hand instead of clicking a thumbnail/color.
+  function handleScroll() {
+    const el = scrollRef.current;
+    if (!el || el.clientWidth === 0) return;
+    const idx = Math.round(el.scrollLeft / el.clientWidth);
+    setActiveIndex((prev) => (prev === idx ? prev : idx));
+  }
+
+  const activeImage = images[activeIndex]?.url ?? images[0].url;
 
   return (
     <>
       <div>
-        <div className="overflow-hidden rounded-[30px] bg-[#f5eeee]">
-          <img
-            src={activeImage}
-            alt={p.name}
-            className={`aspect-[4/5] w-full object-cover ${soldOut ? "opacity-60 grayscale" : ""}`}
-          />
+        <div
+          ref={scrollRef}
+          onScroll={handleScroll}
+          className="flex snap-x snap-mandatory overflow-x-auto rounded-[30px] bg-[#f5eeee] [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        >
+          {images.map((img) => (
+            <img
+              key={img.id}
+              src={img.url}
+              alt={p.name}
+              className={`aspect-[4/5] w-full flex-none snap-start object-cover ${soldOut ? "opacity-60 grayscale" : ""}`}
+            />
+          ))}
         </div>
-        {p.images.length > 1 && (
+        {images.length > 1 && (
           <div className="mt-3 flex flex-wrap gap-2">
-            {p.images.map((img) => (
+            {images.map((img, i) => (
               <button
                 key={img.id}
                 type="button"
-                onClick={() => setManualImage(img.url)}
+                onClick={() => scrollToIndex(i)}
                 className={`h-16 w-14 overflow-hidden rounded-xl border-2 ${
-                  activeImage === img.url ? "border-[#2b2027]" : "border-transparent"
+                  activeIndex === i ? "border-[#2b2027]" : "border-transparent"
                 }`}
               >
                 <img src={img.url} alt="" className="h-full w-full object-cover" />
