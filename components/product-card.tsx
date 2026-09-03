@@ -8,7 +8,7 @@ const money = (n: number) => new Intl.NumberFormat("mn-MN").format(n) + "₮";
 
 export default function ProductCard({ p }: { p: PublicProduct }) {
   const { toggle, has } = useWishlist();
-  const image = p.images[0]?.url || "/products/product-1.jpg";
+  const images = p.images.length ? p.images : [{ id: "fallback", url: "/products/product-1.jpg" }];
   const soldOut = p.stock <= 0;
   const displayPrice = p.salePrice ?? p.price;
 
@@ -27,11 +27,24 @@ export default function ProductCard({ p }: { p: PublicProduct }) {
   return (
     <article className="group">
       <Link href={`/products/${p.slug}`} className="relative block overflow-hidden rounded-[24px] bg-[#f5eeee]">
-        <img
-          src={image}
-          alt={p.name}
-          className={`aspect-[3/4] w-full object-cover transition duration-500 group-hover:scale-[1.035] ${soldOut ? "opacity-60 grayscale" : ""}`}
-        />
+        {images.length > 1 ? (
+          <div className="flex snap-x snap-mandatory overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {images.map((img) => (
+              <img
+                key={img.id}
+                src={img.url}
+                alt={p.name}
+                className={`aspect-[3/4] w-full flex-none snap-start object-cover ${soldOut ? "opacity-60 grayscale" : ""}`}
+              />
+            ))}
+          </div>
+        ) : (
+          <img
+            src={images[0].url}
+            alt={p.name}
+            className={`aspect-[3/4] w-full object-cover transition duration-500 group-hover:scale-[1.035] ${soldOut ? "opacity-60 grayscale" : ""}`}
+          />
+        )}
         {badge && (
           <span
             className={`absolute left-3 top-3 rounded-full px-3 py-1 text-[10px] font-bold tracking-wider ${
