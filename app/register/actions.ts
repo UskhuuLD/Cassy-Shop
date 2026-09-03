@@ -4,6 +4,10 @@ import { redirect } from "next/navigation";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { createCustomerSession } from "@/lib/customer-auth";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
+
+const REGISTER_MAX_ATTEMPTS = 5;
+const REGISTER_WINDOW_MS = 60 * 60 * 1000;
 
 export async function registerAction(_prevState: { error?: string } | undefined, formData: FormData) {
   const name = String(formData.get("name") || "").trim();
@@ -15,6 +19,12 @@ export async function registerAction(_prevState: { error?: string } | undefined,
   }
   if (password.length < 6) {
     return { error: "Нууц үг дор хаяж 6 тэмдэгт байх ёстой." };
+  }
+
+  const ip = await getClientIp();
+  const { allowed } = await checkRateLimit(`register:${ip}`, REGISTER_MAX_ATTEMPTS, REGISTER_WINDOW_MS);
+  if (!allowed) {
+    return { error: "Хэт олон удаа бүртгүүлэх оролдлого хийлээ. Дараа дахин оролдоно уу." };
   }
 
   const existing = await prisma.user.findUnique({ where: { email } });

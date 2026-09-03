@@ -225,3 +225,15 @@ model ShopSettings {
   hours     String
   updatedAt DateTime @updatedAt
 }
+
+// Sliding-window rate limiting for auth endpoints (login, register,
+// forgot-password) — one row per attempt. `key` is a caller-defined bucket
+// like "login:<ip>:<email>" or "register:<ip>". Old rows are pruned lazily
+// by the checker itself; there's no separate cleanup job.
+model RateLimitAttempt {
+  id        String   @id @default(cuid())
+  key       String
+  createdAt DateTime @default(now())
+
+  @@index([key, createdAt])
+}
