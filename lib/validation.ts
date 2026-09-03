@@ -9,7 +9,7 @@ export const productSchema = z.object({
   stock: z.coerce.number().int().min(0, "Нөөц 0-с бага байж болохгүй."),
   sizes: z.array(z.string()).default([]),
   colors: z.array(z.string()).default([]),
-  images: z.array(z.string()).default([]),
+  images: z.array(z.object({ url: z.string(), color: z.string().default("") })).default([]),
   isActive: z.coerce.boolean().default(true),
   isNew: z.coerce.boolean().default(false),
   isBestSeller: z.coerce.boolean().default(false),

@@ -97,6 +97,10 @@ model ProductImage {
   productId String
   product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   url       String
+  // Optional tag matching one of the product's `colors` entries — lets the
+  // storefront swap the displayed photo when a customer picks that color.
+  // Empty string means "not tied to a specific color".
+  color     String   @default("")
   position  Int      @default(0)
   createdAt DateTime @default(now())
 

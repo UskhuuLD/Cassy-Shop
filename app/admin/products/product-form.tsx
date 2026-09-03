@@ -18,11 +18,20 @@ export default function ProductForm({
   onDone: (message: string) => void;
   onCancel: () => void;
 }) {
-  const [images, setImages] = useState<string[]>(product?.images.map((i) => i.url) ?? []);
+  type ImageEntry = { url: string; color: string };
+  const [images, setImages] = useState<ImageEntry[]>(
+    product?.images.map((i) => ({ url: i.url, color: i.color ?? "" })) ?? []
+  );
+  const [colorsText, setColorsText] = useState(product?.colors.join(", ") ?? "");
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
   const [pending, setPending] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+
+  const colorOptions = colorsText
+    .split(",")
+    .map((c) => c.trim())
+    .filter(Boolean);
 
   async function handleFiles(files: FileList | null) {
     if (!files || !files.length) return;
@@ -40,18 +49,21 @@ export default function ProductForm({
       if ("error" in result) {
         setError(result.error);
       } else {
-        setImages((v) => [...v, result.url]);
+        setImages((v) => [...v, { url: result.url, color: "" }]);
       }
     }
     setUploading(false);
     if (fileRef.current) fileRef.current.value = "";
   }
 
+  function setImageColor(index: number, color: string) {
+    setImages((v) => v.map((img, i) => (i === index ? { ...img, color } : img)));
+  }
+
   async function submit(formData: FormData) {
     setPending(true);
     setError("");
-    formData.delete("images");
-    for (const url of images) formData.append("images", url);
+    formData.set("images", JSON.stringify(images));
     const result = product ? await updateProductAction(product.id, formData) : await createProductAction(formData);
     setPending(false);
     if (!result.ok) {
@@ -117,25 +129,50 @@ export default function ProductForm({
 
         <label>
           <span className="mb-1 block text-sm font-bold">Өнгөнүүд (таслалаар)</span>
-          <input name="colors" defaultValue={product?.colors.join(", ")} className="input" placeholder="Pink, Black" />
+          <input
+            name="colors"
+            value={colorsText}
+            onChange={(e) => setColorsText(e.target.value)}
+            className="input"
+            placeholder="Pink, Black"
+          />
         </label>
 
         <div className="md:col-span-2">
           <span className="mb-1 block text-sm font-bold">Зураг</span>
+          <p className="mb-2 text-xs text-zinc-500">
+            Зураг бүрт өнгө сонговол, хэрэглэгч тэр өнгийг сонгоход яг тэр зураг харагдана.
+          </p>
           <div className="flex flex-wrap gap-3">
-            {images.map((url, i) => (
-              <div key={url + i} className="relative h-20 w-16 overflow-hidden rounded-xl border border-[#eadde3]">
-                <img src={url} className="h-full w-full object-cover" />
-                <button
-                  type="button"
-                  onClick={() => setImages((v) => v.filter((_, idx) => idx !== i))}
-                  className="absolute right-0.5 top-0.5 rounded-full bg-black/60 p-0.5 text-white"
-                >
-                  <X size={12} />
-                </button>
+            {images.map((img, i) => (
+              <div key={img.url + i} className="w-20">
+                <div className="relative h-20 w-20 overflow-hidden rounded-xl border border-[#eadde3]">
+                  <img src={img.url} className="h-full w-full object-cover" />
+                  <button
+                    type="button"
+                    onClick={() => setImages((v) => v.filter((_, idx) => idx !== i))}
+                    className="absolute right-0.5 top-0.5 rounded-full bg-black/60 p-0.5 text-white"
+                  >
+                    <X size={12} />
+                  </button>
+                </div>
+                {colorOptions.length > 0 && (
+                  <select
+                    value={img.color}
+                    onChange={(e) => setImageColor(i, e.target.value)}
+                    className="mt-1 w-full rounded-lg border border-[#eadde3] bg-white px-1 py-1 text-[10px]"
+                  >
+                    <option value="">— Бүх өнгө —</option>
+                    {colorOptions.map((c) => (
+                      <option key={c} value={c}>
+                        {c}
+                      </option>
+                    ))}
+                  </select>
+                )}
               </div>
             ))}
-            <label className="flex h-20 w-16 cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed border-[#cfaabc] text-zinc-400 hover:bg-[#faf5f7]">
+            <label className="flex h-20 w-20 cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed border-[#cfaabc] text-zinc-400 hover:bg-[#faf5f7]">
               {uploading ? <Loader2 size={18} className="animate-spin" /> : <Upload size={18} />}
               <span className="mt-1 text-[10px]">Зураг</span>
               <input ref={fileRef} type="file" accept="image/*" multiple hidden onChange={(e) => handleFiles(e.target.files)} />

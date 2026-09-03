@@ -39,15 +39,23 @@ function readListField(formData: FormData, key: string): string[] {
     .filter(Boolean);
 }
 
-// Image URLs are submitted as repeated `images` form entries (one per
-// uploaded image) rather than comma-joined, because a data: URL — used as a
-// fallback when Cloudinary isn't configured — always contains its own comma
+// Images (url + optional color tag) are submitted as a single JSON-encoded
+// field rather than comma-joined, because a data: URL — used as a fallback
+// when Cloudinary isn't configured — always contains its own comma
 // ("data:image/jpeg;base64,<payload>"), which would corrupt a joined/split
-// list. See product-form.tsx's use of formData.append("images", url).
-function readImageUrls(formData: FormData): string[] {
-  return formData
-    .getAll("images")
-    .filter((v): v is string => typeof v === "string" && v.length > 0);
+// list. See product-form.tsx's use of formData.set("images", JSON.stringify(...)).
+function readImages(formData: FormData): { url: string; color: string }[] {
+  const raw = formData.get("images");
+  if (typeof raw !== "string" || !raw.trim()) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed
+      .filter((x): x is { url: unknown; color?: unknown } => !!x && typeof x.url === "string")
+      .map((x) => ({ url: x.url as string, color: typeof x.color === "string" ? x.color : "" }));
+  } catch {
+    return [];
+  }
 }
 
 function parseProductForm(formData: FormData) {
@@ -60,7 +68,7 @@ function parseProductForm(formData: FormData) {
     stock: formData.get("stock"),
     sizes: readListField(formData, "sizes"),
     colors: readListField(formData, "colors"),
-    images: readImageUrls(formData),
+    images: readImages(formData),
     isActive: formData.get("isActive") === "on" || formData.get("isActive") === "true",
     isNew: formData.get("isNew") === "on" || formData.get("isNew") === "true",
     isBestSeller: formData.get("isBestSeller") === "on" || formData.get("isBestSeller") === "true",
@@ -93,7 +101,7 @@ export async function createProductAction(formData: FormData): Promise<ActionRes
       isNew: data.isNew,
       isBestSeller: data.isBestSeller,
       isComingSoon: data.isComingSoon,
-      images: { create: data.images.map((url, position) => ({ url, position })) },
+      images: { create: data.images.map((img, position) => ({ url: img.url, color: img.color, position })) },
     },
   });
 
@@ -130,9 +138,9 @@ export async function updateProductAction(id: string, formData: FormData): Promi
         colors: data.colors,
         isActive: data.isActive,
         isNew: data.isNew,
-        isBestSeller: data.isBestSeller,
-      isComingSoon: data.isComingSoon,
-        images: { create: data.images.map((url, position) => ({ url, position })) },
+          isBestSeller: data.isBestSeller,
+        isComingSoon: data.isComingSoon,
+        images: { create: data.images.map((img, position) => ({ url: img.url, color: img.color, position })) },
       },
     }),
   ]);
