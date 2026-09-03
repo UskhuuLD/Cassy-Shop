@@ -107,15 +107,6 @@ export default function ProductCard({ p }: { p: PublicProduct }) {
             ))}
           </div>
         )}
-        {!soldOut && (
-          <button
-            onClick={quickAdd}
-            className="absolute inset-x-2 bottom-2 flex items-center justify-center gap-2 rounded-full bg-white/85 py-2.5 text-xs font-bold text-[#2b2027] backdrop-blur transition sm:opacity-0 sm:group-hover:opacity-100"
-          >
-            <ShoppingBag size={15} />
-            {added ? "НЭМЭГДЛЭЭ ✓" : "Сагсанд нэмэх"}
-          </button>
-        )}
       </Link>
       <div className="relative pt-3">
         <button
@@ -133,6 +124,15 @@ export default function ProductCard({ p }: { p: PublicProduct }) {
           <span className={p.salePrice ? "text-[#c9536f]" : ""}>{money(displayPrice)}</span>
           {p.salePrice && <span className="text-zinc-400 line-through">{money(p.price)}</span>}
         </div>
+        {!soldOut && (
+          <button
+            onClick={quickAdd}
+            className="mt-3 flex w-full items-center justify-center gap-2 rounded-full border border-[#eadde3] py-2.5 text-xs font-bold text-[#2b2027] transition hover:bg-[#2b2027] hover:text-white"
+          >
+            <ShoppingBag size={15} />
+            {added ? "НЭМЭГДЛЭЭ ✓" : "Сагсанд нэмэх"}
+          </button>
+        )}
       </div>
     </article>
   );
