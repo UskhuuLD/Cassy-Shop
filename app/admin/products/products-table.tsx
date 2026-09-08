@@ -5,6 +5,7 @@ import { Pencil, Plus, Trash2 } from "lucide-react";
 import ProductForm from "./product-form";
 import { deactivateProductAction, deleteProductAction, toggleProductActiveAction } from "./actions";
 import type { PublicProduct } from "@/lib/products";
+import { totalStock } from "@/lib/product-stock";
 
 const m = (n: number) => new Intl.NumberFormat("mn-MN").format(n) + "₮";
 
@@ -149,7 +150,7 @@ export default function ProductsAdmin({
                     )}
                   </td>
                   <td className="p-4">
-                    {p.stock <= 0 ? <span className="font-bold text-red-600">0 (SOLD OUT)</span> : p.stock}
+                    {totalStock(p) <= 0 ? <span className="font-bold text-red-600">0 (SOLD OUT)</span> : totalStock(p)}
                   </td>
                   <td className="p-4">{p.category.name}</td>
                   <td className="p-4">

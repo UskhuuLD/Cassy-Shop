@@ -7,7 +7,11 @@ import { shopInfo } from "@/lib/shop-info";
 import { getCustomerSession } from "@/lib/customer-auth";
 import { createPaymentIntent, createCheckoutSession } from "@/lib/wire";
 
-export type CheckoutCartItem = { productId: string; size: string; qty: number };
+export type CheckoutCartItem = { productId: string; size: string; color: string; qty: number };
+
+function variantKey(productId: string, size: string, color: string) {
+  return `${productId}::${size || "ONE SIZE"}::${color || ""}`;
+}
 
 export type CheckoutResult =
   | { ok: true; orderCode: string; checkoutUrl?: string }
@@ -28,24 +32,33 @@ export async function placeOrderAction(
   const productIds = [...new Set(cartItems.map((i) => i.productId))];
   const products = await prisma.product.findMany({
     where: { id: { in: productIds } },
-    include: { images: { orderBy: { position: "asc" }, take: 1 } },
+    include: { images: { orderBy: { position: "asc" }, take: 1 }, variants: true },
   });
   const productMap = new Map(products.map((p) => [p.id, p]));
 
-  // Aggregate requested qty per product to check stock accurately even with multiple sizes
-  const requestedQtyByProduct = new Map<string, number>();
+  // Aggregate requested qty per exact (product, size, color) combo to check
+  // stock accurately even when the same product appears multiple times.
+  const requestedQtyByVariant = new Map<string, number>();
   for (const item of cartItems) {
-    requestedQtyByProduct.set(item.productId, (requestedQtyByProduct.get(item.productId) || 0) + item.qty);
+    const key = variantKey(item.productId, item.size, item.color);
+    requestedQtyByVariant.set(key, (requestedQtyByVariant.get(key) || 0) + item.qty);
   }
 
-  for (const [productId, qty] of requestedQtyByProduct) {
+  const variantByKey = new Map<string, { id: string; stock: number }>();
+  for (const [key, qty] of requestedQtyByVariant) {
+    const [productId, size, color] = key.split("::");
     const product = productMap.get(productId);
     if (!product || !product.isActive) {
       return { ok: false, message: "Сагс дахь зарим бараа дэлгүүрээс хасагдсан байна. Сагсаа шинэчилнэ үү." };
     }
-    if (product.stock < qty) {
-      return { ok: false, message: `"${product.name}" барааны үлдэгдэл хүрэлцэхгүй байна (үлдэгдэл: ${product.stock}).` };
+    const variant = product.variants.find((v) => v.size === size && v.color === color);
+    if (!variant || variant.stock < qty) {
+      return {
+        ok: false,
+        message: `"${product.name}" (${size}${color ? ", " + color : ""}) үлдэгдэл хүрэлцэхгүй байна (үлдэгдэл: ${variant?.stock ?? 0}).`,
+      };
     }
+    variantByKey.set(key, variant);
   }
 
   const subtotal = cartItems.reduce((sum, item) => {
@@ -85,6 +98,7 @@ export async function placeOrderAction(
                 name: product.name,
                 image: product.images[0]?.url || "",
                 size: item.size,
+                color: item.color,
                 qty: item.qty,
                 price: product.salePrice ?? product.price,
               };
@@ -93,13 +107,14 @@ export async function placeOrderAction(
         },
       });
 
-      for (const [productId, qty] of requestedQtyByProduct) {
-        const result = await tx.product.updateMany({
-          where: { id: productId, stock: { gte: qty } },
+      for (const [key, qty] of requestedQtyByVariant) {
+        const variant = variantByKey.get(key)!;
+        const result = await tx.productVariant.updateMany({
+          where: { id: variant.id, stock: { gte: qty } },
           data: { stock: { decrement: qty } },
         });
         if (result.count === 0) {
-          throw new Error(`STOCK_CONFLICT:${productId}`);
+          throw new Error(`STOCK_CONFLICT:${key}`);
         }
       }
     });

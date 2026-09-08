@@ -50,6 +50,10 @@ async function main() {
     const existing = await prisma.product.findUnique({ where: { slug } });
     if (existing) continue;
 
+    const sizes = categoryName === "Bags" ? ["ONE SIZE"] : ["S", "M", "L"];
+    const colors = ["Pink", "Ivory", "Black"];
+    const stockPerCombo = 2 + (i % 3);
+
     await prisma.product.create({
       data: {
         name,
@@ -59,12 +63,14 @@ async function main() {
         price,
         salePrice,
         categoryId: categoryMap.get(categoryName)!,
-        stock: 6 + (i % 9),
-        sizes: categoryName === "Bags" ? ["ONE SIZE"] : ["S", "M", "L"],
-        colors: ["Pink", "Ivory", "Black"],
+        sizes,
+        colors,
         isNew: badge === "NEW",
         isBestSeller: badge === "BESTSELLER",
         images: { create: [{ url: `/products/product-${i + 1}.jpg`, position: 0 }] },
+        variants: {
+          create: sizes.flatMap((size) => colors.map((color) => ({ size, color, stock: stockPerCombo }))),
+        },
       },
     });
   }

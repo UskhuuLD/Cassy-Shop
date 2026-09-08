@@ -58,6 +58,26 @@ function readImages(formData: FormData): { url: string; color: string }[] {
   }
 }
 
+// Variants (size + color + stock) are submitted as a single JSON-encoded
+// field for the same reason images are — see readImages below.
+function readVariants(formData: FormData): { size: string; color: string; stock: number }[] {
+  const raw = formData.get("variants");
+  if (typeof raw !== "string" || !raw.trim()) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed
+      .filter((x): x is { size: unknown; color?: unknown; stock: unknown } => !!x && typeof x.size === "string")
+      .map((x) => ({
+        size: x.size as string,
+        color: typeof x.color === "string" ? x.color : "",
+        stock: Number(x.stock) || 0,
+      }));
+  } catch {
+    return [];
+  }
+}
+
 function parseProductForm(formData: FormData) {
   return productSchema.safeParse({
     name: formData.get("name"),
@@ -65,10 +85,10 @@ function parseProductForm(formData: FormData) {
     price: formData.get("price"),
     salePrice: formData.get("salePrice") ? formData.get("salePrice") : null,
     categoryId: formData.get("categoryId"),
-    stock: formData.get("stock"),
     sizes: readListField(formData, "sizes"),
     colors: readListField(formData, "colors"),
     images: readImages(formData),
+    variants: readVariants(formData),
     isActive: formData.get("isActive") === "on" || formData.get("isActive") === "true",
     isNew: formData.get("isNew") === "on" || formData.get("isNew") === "true",
     isBestSeller: formData.get("isBestSeller") === "on" || formData.get("isBestSeller") === "true",
@@ -94,7 +114,6 @@ export async function createProductAction(formData: FormData): Promise<ActionRes
       price: data.price,
       salePrice: data.salePrice ?? null,
       categoryId: data.categoryId,
-      stock: data.stock,
       sizes: data.sizes,
       colors: data.colors,
       isActive: data.isActive,
@@ -102,6 +121,7 @@ export async function createProductAction(formData: FormData): Promise<ActionRes
       isBestSeller: data.isBestSeller,
       isComingSoon: data.isComingSoon,
       images: { create: data.images.map((img, position) => ({ url: img.url, color: img.color, position })) },
+      variants: { create: data.variants },
     },
   });
 
@@ -124,6 +144,7 @@ export async function updateProductAction(id: string, formData: FormData): Promi
 
   await prisma.$transaction([
     prisma.productImage.deleteMany({ where: { productId: id } }),
+    prisma.productVariant.deleteMany({ where: { productId: id } }),
     prisma.product.update({
       where: { id },
       data: {
@@ -133,7 +154,6 @@ export async function updateProductAction(id: string, formData: FormData): Promi
         price: data.price,
         salePrice: data.salePrice ?? null,
         categoryId: data.categoryId,
-        stock: data.stock,
         sizes: data.sizes,
         colors: data.colors,
         isActive: data.isActive,
@@ -141,6 +161,7 @@ export async function updateProductAction(id: string, formData: FormData): Promi
           isBestSeller: data.isBestSeller,
         isComingSoon: data.isComingSoon,
         images: { create: data.images.map((img, position) => ({ url: img.url, color: img.color, position })) },
+        variants: { create: data.variants },
       },
     }),
   ]);
@@ -211,16 +232,6 @@ export async function deactivateProductAction(id: string): Promise<ActionResult>
   const updated = await prisma.product.update({ where: { id }, data: { isActive: false } });
   revalidateStorefront(updated.slug);
   return { ok: true, message: "Бараа идэвхгүй боллоо." };
-}
-
-export async function updateStockAction(id: string, stock: number): Promise<ActionResult> {
-  await requireAdmin();
-  if (!Number.isFinite(stock) || stock < 0) {
-    return { ok: false, message: "Нөөц зөв тоо байх ёстой." };
-  }
-  const updated = await prisma.product.update({ where: { id }, data: { stock } });
-  revalidateStorefront(updated.slug);
-  return { ok: true, message: "Нөөц шинэчлэгдлээ." };
 }
 
 export async function uploadImageAction(dataUrl: string): Promise<{ url: string } | { error: string }> {

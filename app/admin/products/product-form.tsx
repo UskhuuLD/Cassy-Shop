@@ -23,6 +23,12 @@ export default function ProductForm({
     product?.images.map((i) => ({ url: i.url, color: i.color ?? "" })) ?? []
   );
   const [colorsText, setColorsText] = useState(product?.colors.join(", ") ?? "");
+  const [sizesText, setSizesText] = useState(product?.sizes.join(", ") ?? "");
+  const [variantStock, setVariantStock] = useState<Record<string, number>>(() => {
+    const map: Record<string, number> = {};
+    for (const v of product?.variants ?? []) map[`${v.size}|${v.color}`] = v.stock;
+    return map;
+  });
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
   const [pending, setPending] = useState(false);
@@ -32,6 +38,16 @@ export default function ProductForm({
     .split(",")
     .map((c) => c.trim())
     .filter(Boolean);
+  const sizeOptions = sizesText
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  const variantRows = sizeOptions.length ? sizeOptions : ["ONE SIZE"];
+  const variantCols = colorOptions.length ? colorOptions : [""];
+
+  function setVariantValue(size: string, color: string, stock: number) {
+    setVariantStock((v) => ({ ...v, [`${size}|${color}`]: stock }));
+  }
 
   async function handleFiles(files: FileList | null) {
     if (!files || !files.length) return;
@@ -64,6 +80,10 @@ export default function ProductForm({
     setPending(true);
     setError("");
     formData.set("images", JSON.stringify(images));
+    const variants = variantRows.flatMap((size) =>
+      variantCols.map((color) => ({ size, color, stock: variantStock[`${size}|${color}`] ?? 0 }))
+    );
+    formData.set("variants", JSON.stringify(variants));
     const result = product ? await updateProductAction(product.id, formData) : await createProductAction(formData);
     setPending(false);
     if (!result.ok) {
@@ -108,11 +128,6 @@ export default function ProductForm({
         </label>
 
         <label>
-          <span className="mb-1 block text-sm font-bold">Нөөц (ширхэг) *</span>
-          <input name="stock" type="number" min={0} defaultValue={product?.stock ?? 0} required className="input" />
-        </label>
-
-        <label>
           <span className="mb-1 block text-sm font-bold">Үнэ (₮) *</span>
           <input name="price" type="number" min={1} defaultValue={product?.price} required className="input" />
         </label>
@@ -124,7 +139,13 @@ export default function ProductForm({
 
         <label>
           <span className="mb-1 block text-sm font-bold">Хэмжээнүүд (таслалаар)</span>
-          <input name="sizes" defaultValue={product?.sizes.join(", ")} className="input" placeholder="S, M, L" />
+          <input
+            name="sizes"
+            value={sizesText}
+            onChange={(e) => setSizesText(e.target.value)}
+            className="input"
+            placeholder="S, M, L"
+          />
         </label>
 
         <label>
@@ -137,6 +158,43 @@ export default function ProductForm({
             placeholder="Pink, Black"
           />
         </label>
+
+        <div className="md:col-span-2">
+          <span className="mb-1 block text-sm font-bold">Нөөц (хэмжээ × өнгөөр) *</span>
+          <p className="mb-2 text-xs text-zinc-500">Хэмжээ, өнгө тус бүрийн хослолд хэдэн ширхэг байгааг оруулна уу.</p>
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse text-sm">
+              <thead>
+                <tr>
+                  <th className="border border-[#eadde3] bg-[#faf5f7] p-2 text-left text-xs font-bold">Хэмжээ \ Өнгө</th>
+                  {variantCols.map((color) => (
+                    <th key={color || "—"} className="border border-[#eadde3] bg-[#faf5f7] p-2 text-xs font-bold">
+                      {color || "Стандарт"}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {variantRows.map((size) => (
+                  <tr key={size}>
+                    <td className="border border-[#eadde3] p-2 text-xs font-bold">{size}</td>
+                    {variantCols.map((color) => (
+                      <td key={color || "—"} className="border border-[#eadde3] p-1">
+                        <input
+                          type="number"
+                          min={0}
+                          value={variantStock[`${size}|${color}`] ?? 0}
+                          onChange={(e) => setVariantValue(size, color, Math.max(0, Number(e.target.value) || 0))}
+                          className="input w-full min-w-16 text-center"
+                        />
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
 
         <div className="md:col-span-2">
           <span className="mb-1 block text-sm font-bold">Зураг</span>

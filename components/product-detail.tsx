@@ -2,6 +2,7 @@
 import { useRef, useState } from "react";
 import { useCart } from "./cart-context";
 import type { PublicProduct } from "@/lib/products";
+import { totalStock, variantStock as getVariantStock } from "@/lib/product-stock";
 
 const money = (n: number) => new Intl.NumberFormat("mn-MN").format(n) + "₮";
 
@@ -16,7 +17,8 @@ export default function ProductDetail({ p }: { p: PublicProduct }) {
   });
   const [done, setDone] = useState(false);
   const { add } = useCart();
-  const soldOut = p.stock <= 0;
+  const soldOut = totalStock(p) <= 0;
+  const selectedStock = getVariantStock(p, size, color);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   function scrollToIndex(index: number) {
@@ -90,8 +92,10 @@ export default function ProductDetail({ p }: { p: PublicProduct }) {
           <p className="mt-2">
             {soldOut ? (
               <span className="font-bold text-red-600">SOLD OUT — түр дууссан</span>
+            ) : selectedStock <= 0 ? (
+              <span className="font-bold text-red-600">Энэ хэмжээ/өнгө түр дууссан</span>
             ) : (
-              <>✓ Үлдэгдэл: {p.stock} ширхэг</>
+              <>✓ Үлдэгдэл: {selectedStock} ширхэг</>
             )}
           </p>
         </div>
@@ -132,6 +136,10 @@ export default function ProductDetail({ p }: { p: PublicProduct }) {
           <button disabled className="btn w-full cursor-not-allowed bg-zinc-200 text-zinc-500">
             SOLD OUT
           </button>
+        ) : selectedStock <= 0 ? (
+          <button disabled className="btn w-full cursor-not-allowed bg-zinc-200 text-zinc-500">
+            ЭНЭ ХЭМЖЭЭ/ӨНГӨ ДУУССАН
+          </button>
         ) : (
           <button
             onClick={() => {
@@ -144,7 +152,8 @@ export default function ProductDetail({ p }: { p: PublicProduct }) {
                   salePrice: p.salePrice,
                   image: activeImage,
                 },
-                size
+                size,
+                color
               );
               setDone(true);
               setTimeout(() => setDone(false), 1600);

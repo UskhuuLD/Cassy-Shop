@@ -41,7 +41,7 @@ export default function Checkout() {
         note: String(form.get("note") || ""),
         pickup,
       },
-      items.map((item) => ({ productId: item.product.id, size: item.size, qty: item.qty }))
+      items.map((item) => ({ productId: item.product.id, size: item.size, color: item.color, qty: item.qty }))
     );
 
     setPending(false);
@@ -125,12 +125,13 @@ export default function Checkout() {
         {items.map((item) => {
           const price = item.product.salePrice ?? item.product.price;
           return (
-            <div key={item.product.id + item.size} className="mt-4 flex gap-3">
+            <div key={item.product.id + item.size + item.color} className="mt-4 flex gap-3">
               <img src={item.product.image} alt={item.product.name} className="h-16 w-12 rounded-lg object-cover" />
               <div className="flex-1 text-sm">
                 <p className="font-semibold">{item.product.name}</p>
                 <p className="text-zinc-500">
-                  {item.size} × {item.qty}
+                  {item.size}
+                  {item.color && ` · ${item.color}`} × {item.qty}
                 </p>
               </div>
               <b className="text-sm">{money(price * item.qty)}</b>

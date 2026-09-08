@@ -5,6 +5,7 @@ import type { Prisma } from "@prisma/client";
 const publicProductInclude = {
   category: true,
   images: { orderBy: { position: "asc" as const } },
+  variants: true,
 } satisfies Prisma.ProductInclude;
 
 export type PublicProduct = Prisma.ProductGetPayload<{ include: typeof publicProductInclude }>;

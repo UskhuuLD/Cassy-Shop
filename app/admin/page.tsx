@@ -37,7 +37,7 @@ export default async function Admin() {
     await Promise.all([
       prisma.product.count(),
       prisma.product.count({ where: { isActive: true } }),
-      prisma.product.count({ where: { stock: { lte: 0 } } }),
+      prisma.product.count({ where: { variants: { none: { stock: { gt: 0 } } } } }),
       prisma.order.count(),
       prisma.order.aggregate({ _sum: { total: true }, where: { status: { not: "CANCELLED" } } }),
       getLast7DaysRevenue(),

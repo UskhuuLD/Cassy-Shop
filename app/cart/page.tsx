@@ -26,25 +26,28 @@ export default function Cart() {
             {items.map((x) => {
               const price = x.product.salePrice ?? x.product.price;
               return (
-                <div key={x.product.id + x.size} className="card flex gap-4 p-4">
+                <div key={x.product.id + x.size + x.color} className="card flex gap-4 p-4">
                   <img src={x.product.image} className="h-36 w-28 rounded-2xl object-cover" />
                   <div className="flex flex-1 flex-col">
                     <div className="flex justify-between gap-3">
                       <div>
                         <p className="font-bold">{x.product.name}</p>
-                        <p className="mt-1 text-sm text-zinc-500">Size: {x.size}</p>
+                        <p className="mt-1 text-sm text-zinc-500">
+                          Size: {x.size}
+                          {x.color && ` · ${x.color}`}
+                        </p>
                       </div>
-                      <button onClick={() => remove(x.product.id, x.size)}>
+                      <button onClick={() => remove(x.product.id, x.size, x.color)}>
                         <Trash2 size={18} />
                       </button>
                     </div>
                     <div className="mt-auto flex items-center justify-between">
                       <div className="flex items-center rounded-full border border-[#eadde3]">
-                        <button className="p-2" onClick={() => change(x.product.id, x.size, x.qty - 1)}>
+                        <button className="p-2" onClick={() => change(x.product.id, x.size, x.color, x.qty - 1)}>
                           <Minus size={15} />
                         </button>
                         <span className="px-2 text-sm">{x.qty}</span>
-                        <button className="p-2" onClick={() => change(x.product.id, x.size, x.qty + 1)}>
+                        <button className="p-2" onClick={() => change(x.product.id, x.size, x.color, x.qty + 1)}>
                           <Plus size={15} />
                         </button>
                       </div>

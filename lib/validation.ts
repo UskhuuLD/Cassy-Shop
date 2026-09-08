@@ -6,10 +6,18 @@ export const productSchema = z.object({
   price: z.coerce.number().int().positive("Үнэ 0-с их байх ёстой."),
   salePrice: z.coerce.number().int().positive().optional().nullable(),
   categoryId: z.string().min(1, "Ангилал сонгоно уу."),
-  stock: z.coerce.number().int().min(0, "Нөөц 0-с бага байж болохгүй."),
   sizes: z.array(z.string()).default([]),
   colors: z.array(z.string()).default([]),
   images: z.array(z.object({ url: z.string(), color: z.string().default("") })).default([]),
+  variants: z
+    .array(
+      z.object({
+        size: z.string().min(1),
+        color: z.string().default(""),
+        stock: z.coerce.number().int().min(0, "Нөөц 0-с бага байж болохгүй."),
+      })
+    )
+    .min(1, "Дор хаяж нэг хэмжээ/өнгийн нөөц оруулна уу."),
   isActive: z.coerce.boolean().default(true),
   isNew: z.coerce.boolean().default(false),
   isBestSeller: z.coerce.boolean().default(false),

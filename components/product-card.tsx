@@ -5,6 +5,7 @@ import { Heart, ShoppingBag } from "lucide-react";
 import { useWishlist } from "./wishlist-context";
 import { useCart } from "./cart-context";
 import type { PublicProduct } from "@/lib/products";
+import { totalStock } from "@/lib/product-stock";
 
 const money = (n: number) => new Intl.NumberFormat("mn-MN").format(n) + "₮";
 
@@ -12,7 +13,7 @@ export default function ProductCard({ p }: { p: PublicProduct }) {
   const { toggle, has } = useWishlist();
   const { add } = useCart();
   const images = p.images.length ? p.images : [{ id: "fallback", url: "/products/product-1.jpg" }];
-  const soldOut = p.stock <= 0;
+  const soldOut = totalStock(p) <= 0;
   const displayPrice = p.salePrice ?? p.price;
   const [activeIndex, setActiveIndex] = useState(0);
   const [added, setAdded] = useState(false);
@@ -28,6 +29,7 @@ export default function ProductCard({ p }: { p: PublicProduct }) {
   function quickAdd(e: React.MouseEvent) {
     e.preventDefault();
     e.stopPropagation();
+    const variant = p.variants.find((v) => v.stock > 0) ?? p.variants[0];
     add(
       {
         id: p.id,
@@ -37,7 +39,8 @@ export default function ProductCard({ p }: { p: PublicProduct }) {
         salePrice: p.salePrice,
         image: images[activeIndex]?.url ?? images[0].url,
       },
-      p.sizes[0] || "ONE SIZE"
+      variant?.size ?? p.sizes[0] ?? "ONE SIZE",
+      variant?.color ?? p.colors[0] ?? ""
     );
     setAdded(true);
     setTimeout(() => setAdded(false), 1400);
