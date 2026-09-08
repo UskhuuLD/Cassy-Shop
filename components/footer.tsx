@@ -8,7 +8,7 @@ export default function Footer({ shopInfo }: { shopInfo: ShopInfo }) {
   const categories = useCategories();
 
   return (
-    <footer className="mt-20 border-t border-[#eadde3] bg-[#2b2027] text-white">
+    <footer className="mt-24 border-t border-[#eadde3] bg-[#2b2027] text-white">
       <div className="container-page grid gap-10 py-14 md:grid-cols-2 lg:grid-cols-4">
         <div>
           <p className="serif text-3xl">Cassy shop</p>

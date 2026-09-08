@@ -37,7 +37,7 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className="container-page grid gap-5 py-8 md:grid-cols-3 md:gap-4 md:py-6">
+      <section className="container-page grid gap-6 py-10 md:grid-cols-3 md:gap-4 md:py-6">
         <div className="info-strip">
           <Truck />
           <div>
@@ -61,8 +61,8 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className="container-page py-14">
-        <div className="mb-7 flex items-end justify-between">
+      <section className="container-page py-16">
+        <div className="mb-8 flex items-end justify-between">
           <div>
             <p className="eyebrow">CASSY PICKS</p>
             <h2 className="serif mt-2 text-4xl">New arrivals</h2>
@@ -84,7 +84,7 @@ export default async function Home() {
         )}
       </section>
 
-      <section className="bg-[#f9edf2] py-16">
+      <section className="bg-[#f9edf2] py-20">
         <div className="container-page grid items-center gap-10 md:grid-cols-2">
           <div className="grid grid-cols-2 gap-3">
             <img src={content.styleEditImage1} className="h-[430px] w-full rounded-[28px] object-cover" />
@@ -104,7 +104,7 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className="container-page py-16">
+      <section className="container-page py-20">
         <div className="rounded-[36px] border border-[#eadde3] bg-white p-8 text-center md:p-14">
           <Instagram className="mx-auto" />
           <p className="eyebrow mt-4">FOLLOW OUR DAILY DROPS</p>
