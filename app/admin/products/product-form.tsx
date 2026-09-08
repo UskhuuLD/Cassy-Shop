@@ -184,6 +184,7 @@ export default function ProductForm({
                           type="number"
                           min={0}
                           value={variantStock[`${size}|${color}`] ?? 0}
+                          onFocus={(e) => e.target.select()}
                           onChange={(e) => setVariantValue(size, color, Math.max(0, Number(e.target.value) || 0))}
                           className="input w-full min-w-16 text-center"
                         />
