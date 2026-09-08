@@ -14,6 +14,7 @@ export default function ProductCard({ p }: { p: PublicProduct }) {
   const { add } = useCart();
   const images = p.images.length ? p.images : [{ id: "fallback", url: "/products/product-1.jpg" }];
   const soldOut = totalStock(p) <= 0;
+  const comingSoon = p.isComingSoon && (!p.comingSoonUntil || new Date(p.comingSoonUntil).getTime() > Date.now());
   const displayPrice = p.salePrice ?? p.price;
   const [activeIndex, setActiveIndex] = useState(0);
   const [added, setAdded] = useState(false);
@@ -46,7 +47,7 @@ export default function ProductCard({ p }: { p: PublicProduct }) {
     setTimeout(() => setAdded(false), 1400);
   }
 
-  const badge = p.isComingSoon
+  const badge = comingSoon
     ? "ТУН УДАХГҮЙ"
     : soldOut
       ? "SOLD OUT"
@@ -86,7 +87,7 @@ export default function ProductCard({ p }: { p: PublicProduct }) {
         {badge && (
           <span
             className={`absolute left-3 top-3 rounded-full px-3 py-1 text-[10px] font-bold tracking-wider ${
-              p.isComingSoon
+              comingSoon
                 ? "bg-[#a76f83] text-white"
                 : soldOut
                   ? "bg-[#2b2027] text-white"

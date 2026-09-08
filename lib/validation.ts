@@ -22,6 +22,7 @@ export const productSchema = z.object({
   isNew: z.coerce.boolean().default(false),
   isBestSeller: z.coerce.boolean().default(false),
   isComingSoon: z.coerce.boolean().default(false),
+  comingSoonDays: z.coerce.number().int().min(1).max(365).optional().nullable(),
 });
 
 export type ProductFormValues = z.infer<typeof productSchema>;

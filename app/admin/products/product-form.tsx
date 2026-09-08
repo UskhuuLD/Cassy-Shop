@@ -34,6 +34,12 @@ export default function ProductForm({
   const [pending, setPending] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
+  const [comingSoon, setComingSoon] = useState(product?.isComingSoon ?? false);
+  const daysLeft = product?.comingSoonUntil
+    ? Math.max(1, Math.ceil((new Date(product.comingSoonUntil).getTime() - Date.now()) / 86_400_000))
+    : null;
+  const [comingSoonDays, setComingSoonDays] = useState(daysLeft ? String(daysLeft) : "");
+
   const colorOptions = colorsText
     .split(",")
     .map((c) => c.trim())
@@ -250,9 +256,38 @@ export default function ProductForm({
             <input type="checkbox" name="isBestSeller" defaultChecked={product?.isBestSeller} /> BEST SELLER badge
           </label>
           <label className="flex items-center gap-2 text-sm font-semibold">
-            <input type="checkbox" name="isComingSoon" defaultChecked={product?.isComingSoon} /> Тун удахгүй badge
+            <input
+              type="checkbox"
+              name="isComingSoon"
+              defaultChecked={product?.isComingSoon}
+              onChange={(e) => setComingSoon(e.target.checked)}
+            />{" "}
+            Тун удахгүй badge
           </label>
         </div>
+
+        {comingSoon && (
+          <div className="rounded-2xl border border-[#eadde3] bg-[#fdf6f9] p-4 md:col-span-2">
+            <label className="flex items-center gap-3">
+              <span className="text-sm font-bold">Хэдэн хоногийн дараа автоматаар унтрах вэ?</span>
+              <input
+                type="number"
+                min={1}
+                max={365}
+                name="comingSoonDays"
+                value={comingSoonDays}
+                onChange={(e) => setComingSoonDays(e.target.value)}
+                onFocus={(e) => e.target.select()}
+                placeholder="3"
+                className="input w-20 text-center"
+              />
+              <span className="text-sm text-zinc-500">хоног</span>
+            </label>
+            <p className="mt-2 text-xs text-zinc-500">
+              Заасан хоног өнгөрмөгц badge автоматаар алга болно. Хоосон орхивол та гараар унтраатал байнга харагдана.
+            </p>
+          </div>
+        )}
 
         {error && <p className="text-sm font-semibold text-red-600 md:col-span-2">{error}</p>}
 

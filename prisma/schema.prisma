@@ -78,6 +78,10 @@ model Product {
   isNew        Boolean  @default(false)
   isBestSeller Boolean  @default(false)
   isComingSoon Boolean  @default(false)
+  // When set, the "coming soon" badge auto-expires at this time instead of
+  // staying on until an admin manually unchecks isComingSoon. Computed
+  // server-side from the admin form's day count (now + N days).
+  comingSoonUntil DateTime?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 

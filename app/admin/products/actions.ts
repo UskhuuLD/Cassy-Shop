@@ -93,7 +93,16 @@ function parseProductForm(formData: FormData) {
     isNew: formData.get("isNew") === "on" || formData.get("isNew") === "true",
     isBestSeller: formData.get("isBestSeller") === "on" || formData.get("isBestSeller") === "true",
     isComingSoon: formData.get("isComingSoon") === "on" || formData.get("isComingSoon") === "true",
+    comingSoonDays: formData.get("comingSoonDays") ? formData.get("comingSoonDays") : null,
   });
+}
+
+// A day count re-typed in the form always restarts the countdown from now;
+// leaving it blank keeps whatever expiry (or lack of one) was already set.
+function computeComingSoonUntil(isComingSoon: boolean, days: number | null | undefined, existingUntil: Date | null): Date | null {
+  if (!isComingSoon) return null;
+  if (days) return new Date(Date.now() + days * 24 * 60 * 60 * 1000);
+  return existingUntil;
 }
 
 export async function createProductAction(formData: FormData): Promise<ActionResult> {
@@ -120,6 +129,7 @@ export async function createProductAction(formData: FormData): Promise<ActionRes
       isNew: data.isNew,
       isBestSeller: data.isBestSeller,
       isComingSoon: data.isComingSoon,
+      comingSoonUntil: computeComingSoonUntil(data.isComingSoon, data.comingSoonDays, null),
       images: { create: data.images.map((img, position) => ({ url: img.url, color: img.color, position })) },
       variants: { create: data.variants },
     },
@@ -160,6 +170,7 @@ export async function updateProductAction(id: string, formData: FormData): Promi
         isNew: data.isNew,
           isBestSeller: data.isBestSeller,
         isComingSoon: data.isComingSoon,
+        comingSoonUntil: computeComingSoonUntil(data.isComingSoon, data.comingSoonDays, existing.comingSoonUntil),
         images: { create: data.images.map((img, position) => ({ url: img.url, color: img.color, position })) },
         variants: { create: data.variants },
       },
