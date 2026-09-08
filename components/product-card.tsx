@@ -14,7 +14,9 @@ export default function ProductCard({ p }: { p: PublicProduct }) {
   const { add } = useCart();
   const images = p.images.length ? p.images : [{ id: "fallback", url: "/products/product-1.jpg" }];
   const soldOut = totalStock(p) <= 0;
-  const comingSoon = p.isComingSoon && (!p.comingSoonUntil || new Date(p.comingSoonUntil).getTime() > Date.now());
+  const comingSoonMsLeft = p.comingSoonUntil ? new Date(p.comingSoonUntil).getTime() - Date.now() : null;
+  const comingSoon = p.isComingSoon && (comingSoonMsLeft === null || comingSoonMsLeft > 0);
+  const comingSoonDaysLeft = comingSoonMsLeft !== null ? Math.max(1, Math.ceil(comingSoonMsLeft / 86_400_000)) : null;
   const displayPrice = p.salePrice ?? p.price;
   const [activeIndex, setActiveIndex] = useState(0);
   const [added, setAdded] = useState(false);
@@ -48,7 +50,9 @@ export default function ProductCard({ p }: { p: PublicProduct }) {
   }
 
   const badge = comingSoon
-    ? "ТУН УДАХГҮЙ"
+    ? comingSoonDaysLeft
+      ? `ТУН УДАХГҮЙ · ${comingSoonDaysLeft} ХОНОГ`
+      : "ТУН УДАХГҮЙ"
     : soldOut
       ? "SOLD OUT"
       : p.salePrice
