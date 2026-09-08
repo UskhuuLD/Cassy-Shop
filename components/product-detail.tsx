@@ -93,7 +93,7 @@ export default function ProductDetail({ p }: { p: PublicProduct }) {
             {soldOut ? (
               <span className="font-bold text-red-600">SOLD OUT — түр дууссан</span>
             ) : selectedStock <= 0 ? (
-              <span className="font-bold text-red-600">Энэ хэмжээ/өнгө түр дууссан</span>
+              <span className="font-bold text-red-600">SOLD OUT — энэ хэмжээ/өнгө түр дууссан</span>
             ) : (
               <>✓ Үлдэгдэл: {selectedStock} ширхэг</>
             )}
@@ -138,7 +138,7 @@ export default function ProductDetail({ p }: { p: PublicProduct }) {
           </button>
         ) : selectedStock <= 0 ? (
           <button disabled className="btn w-full cursor-not-allowed bg-zinc-200 text-zinc-500">
-            ЭНЭ ХЭМЖЭЭ/ӨНГӨ ДУУССАН
+            SOLD OUT
           </button>
         ) : (
           <button
