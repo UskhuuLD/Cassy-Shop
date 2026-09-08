@@ -65,21 +65,6 @@ export default function ProductCard({ p }: { p: PublicProduct }) {
 
   return (
     <article className="group">
-      {badge && (
-        <span
-          className={`mb-2 inline-block rounded-full px-3 py-1 text-[10px] font-bold tracking-wider ${
-            comingSoon
-              ? "bg-[#a76f83] text-white"
-              : soldOut
-                ? "bg-[#2b2027] text-white"
-                : badge === "SALE"
-                  ? "bg-[#c9536f] text-white"
-                  : "border border-[#eadde3] bg-white"
-          }`}
-        >
-          {badge}
-        </span>
-      )}
       <Link href={`/products/${p.slug}`} className="relative block overflow-hidden rounded-[24px] bg-[#f5eeee]">
         {images.length > 1 ? (
           <div
@@ -102,6 +87,21 @@ export default function ProductCard({ p }: { p: PublicProduct }) {
             alt={p.name}
             className={`aspect-[3/4] w-full object-cover transition duration-500 group-hover:scale-[1.035] ${soldOut ? "opacity-60 grayscale" : ""}`}
           />
+        )}
+        {badge && (
+          <span
+            className={`absolute left-3 top-3 rounded-full px-3 py-1 text-[10px] font-bold tracking-wider ${
+              comingSoon
+                ? "bg-[#a76f83] text-white"
+                : soldOut
+                  ? "bg-[#2b2027] text-white"
+                  : badge === "SALE"
+                    ? "bg-[#c9536f] text-white"
+                    : "bg-white"
+            }`}
+          >
+            {badge}
+          </span>
         )}
       </Link>
       {images.length > 1 && (
