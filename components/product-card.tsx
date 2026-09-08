@@ -98,19 +98,19 @@ export default function ProductCard({ p }: { p: PublicProduct }) {
             {badge}
           </span>
         )}
-        {images.length > 1 && (
-          <div className="absolute left-0 right-0 top-3 flex justify-center gap-1.5">
-            {images.map((img, i) => (
-              <span
-                key={img.id}
-                className={`h-1 rounded-full transition-all ${
-                  i === activeIndex ? "w-5 bg-white" : "w-3 bg-white/50"
-                }`}
-              />
-            ))}
-          </div>
-        )}
       </Link>
+      {images.length > 1 && (
+        <div className="mt-2 flex justify-center gap-1.5">
+          {images.map((img, i) => (
+            <span
+              key={img.id}
+              className={`h-1 rounded-full transition-all ${
+                i === activeIndex ? "w-5 bg-[#2b2027]" : "w-3 bg-[#eadde3]"
+              }`}
+            />
+          ))}
+        </div>
+      )}
       <div className="relative pt-3">
         <button
           aria-label="wishlist"
