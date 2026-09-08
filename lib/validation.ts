@@ -30,3 +30,8 @@ export type ProductFormValues = z.infer<typeof productSchema>;
 export const categorySchema = z.object({
   name: z.string().trim().min(2, "Ангиллын нэр дор хаяж 2 тэмдэгт байх ёстой."),
 });
+
+export const faqSchema = z.object({
+  question: z.string().trim().min(2, "Асуулт дор хаяж 2 тэмдэгт байх ёстой."),
+  answer: z.string().trim().min(2, "Хариулт дор хаяж 2 тэмдэгт байх ёстой."),
+});

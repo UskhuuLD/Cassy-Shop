@@ -220,6 +220,17 @@ model Review {
   @@index([productId])
 }
 
+// Customer-facing FAQ entries shown on /faq and linked from the footer,
+// managed from /admin/faq.
+model FaqItem {
+  id        String   @id @default(cuid())
+  question  String
+  answer    String
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 // Small, editable homepage visuals (hero + style-edit section), managed from
 // /admin/homepage instead of being hardcoded in the page component.
 model SiteContent {

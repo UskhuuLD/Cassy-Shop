@@ -19,6 +19,9 @@ export default function AdminNav() {
       <Link className="rounded-full px-4 py-2 text-sm font-semibold hover:bg-[#f9edf2]" href="/admin/homepage">
         Нүүр хуудас
       </Link>
+      <Link className="rounded-full px-4 py-2 text-sm font-semibold hover:bg-[#f9edf2]" href="/admin/faq">
+        FAQ
+      </Link>
       <Link className="rounded-full px-4 py-2 text-sm font-semibold hover:bg-[#f9edf2]" href="/admin/settings">
         Тохиргоо
       </Link>

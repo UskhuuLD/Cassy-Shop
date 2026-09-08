@@ -41,6 +41,7 @@ export default function Footer({ shopInfo }: { shopInfo: ShopInfo }) {
           <div className="footer-links">
             <Link href="/cart">Сагс</Link>
             <Link href="/checkout">Захиалга өгөх</Link>
+            <Link href="/faq">Түгээмэл асуулт (FAQ)</Link>
             <Link href="/login">Нэвтрэх</Link>
           </div>
         </div>
