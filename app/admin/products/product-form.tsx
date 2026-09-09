@@ -7,6 +7,46 @@ import type { PublicProduct } from "@/lib/products";
 
 type CategoryOption = { id: string; name: string };
 
+// Shrinks a photo to at most 1600px on its long side and re-encodes it as
+// JPEG q0.85 before it ever leaves the browser — phone camera photos are
+// routinely several MB, which made uploads slow and occasionally too big for
+// the server action's body limit. A few hundred KB uploads fast and still
+// looks fine at product-card/detail sizes.
+function resizeImage(file: File, maxDim = 1600, quality = 0.85): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const objectUrl = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(objectUrl);
+      let { width, height } = img;
+      if (width > maxDim || height > maxDim) {
+        if (width > height) {
+          height = Math.round((height * maxDim) / width);
+          width = maxDim;
+        } else {
+          width = Math.round((width * maxDim) / height);
+          height = maxDim;
+        }
+      }
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) {
+        reject(new Error("Canvas дэмжигдэхгүй байна."));
+        return;
+      }
+      ctx.drawImage(img, 0, 0, width, height);
+      resolve(canvas.toDataURL("image/jpeg", quality));
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      reject(new Error("Зургийг уншиж чадсангүй."));
+    };
+    img.src = objectUrl;
+  });
+}
+
 export default function ProductForm({
   product,
   categories,
@@ -59,22 +99,28 @@ export default function ProductForm({
     if (!files || !files.length) return;
     setUploading(true);
     setError("");
+    // Each file gets its own try/catch so one bad/oversized photo doesn't
+    // stop the rest of the batch from uploading.
+    const errors: string[] = [];
     for (const file of Array.from(files)) {
-      if (!file.type.startsWith("image/")) continue;
-      const dataUrl: string = await new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result as string);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
-      const result = await uploadImageAction(dataUrl);
-      if ("error" in result) {
-        setError(result.error);
-      } else {
-        setImages((v) => [...v, { url: result.url, color: "" }]);
+      if (!file.type.startsWith("image/")) {
+        errors.push(`${file.name}: зөвхөн зургийн файл дэмжигдэнэ.`);
+        continue;
+      }
+      try {
+        const dataUrl = await resizeImage(file);
+        const result = await uploadImageAction(dataUrl);
+        if ("error" in result) {
+          errors.push(`${file.name}: ${result.error}`);
+        } else {
+          setImages((v) => [...v, { url: result.url, color: "" }]);
+        }
+      } catch (err) {
+        errors.push(`${file.name}: ${err instanceof Error ? err.message : "Тодорхойгүй алдаа гарлаа."}`);
       }
     }
     setUploading(false);
+    if (errors.length) setError(errors.join("\n"));
     if (fileRef.current) fileRef.current.value = "";
   }
 
@@ -289,7 +335,7 @@ export default function ProductForm({
           </div>
         )}
 
-        {error && <p className="text-sm font-semibold text-red-600 md:col-span-2">{error}</p>}
+        {error && <p className="whitespace-pre-line text-sm font-semibold text-red-600 md:col-span-2">{error}</p>}
 
         <div className="flex gap-3 md:col-span-2">
           <button type="submit" disabled={pending || uploading} className="btn btn-dark flex-1 disabled:opacity-50">
