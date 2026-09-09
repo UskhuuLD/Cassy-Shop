@@ -121,39 +121,90 @@ export default function ProductsAdmin({
           <p className="mt-2 text-sm text-zinc-500">"Бараа нэмэх" товч дарж эхний бараагаа нэмнэ үү.</p>
         </div>
       ) : (
-        <div className="card mt-7 overflow-x-auto">
-          <table className="w-full min-w-[860px] text-left text-sm">
-            <thead className="bg-[#f9edf2]">
-              <tr>
-                {["Бараа", "Зураг", "Үнэ", "Нөөц", "Ангилал", "Төлөв", ""].map((h) => (
-                  <th key={h} className="p-4 font-semibold">
-                    {h}
-                  </th>
+        <>
+          {/* Desktop/tablet: full table, scrolls horizontally past this width */}
+          <div className="card mt-7 hidden overflow-x-auto md:block">
+            <table className="w-full min-w-[860px] text-left text-sm">
+              <thead className="bg-[#f9edf2]">
+                <tr>
+                  {["Бараа", "Зураг", "Үнэ", "Нөөц", "Ангилал", "Төлөв", ""].map((h) => (
+                    <th key={h} className="p-4 font-semibold">
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {products.map((p) => (
+                  <tr key={p.id} className="border-t border-[#eadde3]">
+                    <td className="p-4 font-semibold">{p.name}</td>
+                    <td className="p-4">
+                      <img src={p.images[0]?.url || "/products/product-1.jpg"} className="h-14 w-11 rounded-lg object-cover" />
+                    </td>
+                    <td className="p-4">
+                      {p.salePrice ? (
+                        <>
+                          <div className="font-bold text-[#c9536f]">{m(p.salePrice)}</div>
+                          <div className="text-xs text-zinc-400 line-through">{m(p.price)}</div>
+                        </>
+                      ) : (
+                        <b>{m(p.price)}</b>
+                      )}
+                    </td>
+                    <td className="p-4">
+                      {totalStock(p) <= 0 ? <span className="font-bold text-red-600">0 (SOLD OUT)</span> : totalStock(p)}
+                    </td>
+                    <td className="p-4">{p.category.name}</td>
+                    <td className="p-4">
+                      <button
+                        onClick={() => onToggle(p)}
+                        disabled={isPending}
+                        className={`rounded-full px-3 py-1 text-xs font-bold ${p.isActive ? "bg-[#e8f5e9] text-[#2e7d32]" : "bg-zinc-200 text-zinc-500"}`}
+                      >
+                        {p.isActive ? "Идэвхтэй" : "Идэвхгүй"}
+                      </button>
+                    </td>
+                    <td className="p-4">
+                      <div className="flex gap-2">
+                        <button onClick={() => openEdit(p)} className="rounded-full border border-[#eadde3] p-2 hover:bg-[#f9edf2]">
+                          <Pencil size={16} />
+                        </button>
+                        <button onClick={() => onDelete(p)} className="rounded-full border border-[#eadde3] p-2 hover:bg-red-50">
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
                 ))}
-              </tr>
-            </thead>
-            <tbody>
-              {products.map((p) => (
-                <tr key={p.id} className="border-t border-[#eadde3]">
-                  <td className="p-4 font-semibold">{p.name}</td>
-                  <td className="p-4">
-                    <img src={p.images[0]?.url || "/products/product-1.jpg"} className="h-14 w-11 rounded-lg object-cover" />
-                  </td>
-                  <td className="p-4">
+              </tbody>
+            </table>
+          </div>
+
+          {/* Mobile: no horizontal scrolling — one stacked card per product */}
+          <div className="mt-7 space-y-4 md:hidden">
+            {products.map((p) => (
+              <div key={p.id} className="card flex gap-3 p-4">
+                <img
+                  src={p.images[0]?.url || "/products/product-1.jpg"}
+                  className="h-20 w-16 flex-none rounded-lg object-cover"
+                />
+                <div className="min-w-0 flex-1">
+                  <p className="truncate font-semibold">{p.name}</p>
+                  <p className="text-xs text-zinc-500">{p.category.name}</p>
+                  <div className="mt-1 flex items-center gap-2 text-sm">
                     {p.salePrice ? (
                       <>
-                        <div className="font-bold text-[#c9536f]">{m(p.salePrice)}</div>
-                        <div className="text-xs text-zinc-400 line-through">{m(p.price)}</div>
+                        <b className="text-[#c9536f]">{m(p.salePrice)}</b>
+                        <span className="text-xs text-zinc-400 line-through">{m(p.price)}</span>
                       </>
                     ) : (
                       <b>{m(p.price)}</b>
                     )}
-                  </td>
-                  <td className="p-4">
-                    {totalStock(p) <= 0 ? <span className="font-bold text-red-600">0 (SOLD OUT)</span> : totalStock(p)}
-                  </td>
-                  <td className="p-4">{p.category.name}</td>
-                  <td className="p-4">
+                  </div>
+                  <p className="mt-1 text-xs text-zinc-500">
+                    Нөөц: {totalStock(p) <= 0 ? <span className="font-bold text-red-600">0 (SOLD OUT)</span> : totalStock(p)}
+                  </p>
+                  <div className="mt-2 flex flex-wrap items-center gap-2">
                     <button
                       onClick={() => onToggle(p)}
                       disabled={isPending}
@@ -161,22 +212,18 @@ export default function ProductsAdmin({
                     >
                       {p.isActive ? "Идэвхтэй" : "Идэвхгүй"}
                     </button>
-                  </td>
-                  <td className="p-4">
-                    <div className="flex gap-2">
-                      <button onClick={() => openEdit(p)} className="rounded-full border border-[#eadde3] p-2 hover:bg-[#f9edf2]">
-                        <Pencil size={16} />
-                      </button>
-                      <button onClick={() => onDelete(p)} className="rounded-full border border-[#eadde3] p-2 hover:bg-red-50">
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                    <button onClick={() => openEdit(p)} className="rounded-full border border-[#eadde3] p-2 hover:bg-[#f9edf2]">
+                      <Pencil size={16} />
+                    </button>
+                    <button onClick={() => onDelete(p)} className="rounded-full border border-[#eadde3] p-2 hover:bg-red-50">
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
       )}
 
       {confirmDelete && (
