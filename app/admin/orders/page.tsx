@@ -1,6 +1,7 @@
 import AdminNav from "@/components/admin-nav";
 import { prisma } from "@/lib/prisma";
 import { getPaymentIntent } from "@/lib/wire";
+import { confirmOrderPaid } from "@/lib/order-payment";
 import OrdersTable from "./orders-table";
 
 export const dynamic = "force-dynamic";
@@ -9,8 +10,10 @@ export const dynamic = "force-dynamic";
 // dropped delivery, signature/timestamp mismatch, etc.) — same reconciliation
 // the checkout success page does, but here it covers every still-pending
 // order each time an admin opens this page, not just the one the customer
-// happens to revisit.
-async function reconcilePendingWireOrders(orders: { id: string; paid: boolean; wirePaymentIntentId: string | null }[]) {
+// happens to revisit. confirmOrderPaid also decrements the paid order's
+// variant stock — deferred until now instead of at checkout, so an
+// abandoned/unpaid order never locks up inventory.
+async function reconcilePendingWireOrders(orders: { code: string; paid: boolean; wirePaymentIntentId: string | null }[]) {
   if (!process.env.WIRE_API_KEY) return;
   const pending = orders.filter((o) => !o.paid && o.wirePaymentIntentId);
   await Promise.all(
@@ -18,11 +21,11 @@ async function reconcilePendingWireOrders(orders: { id: string; paid: boolean; w
       try {
         const intent = await getPaymentIntent(o.wirePaymentIntentId!);
         if (intent.status === "succeeded") {
-          await prisma.order.update({ where: { id: o.id }, data: { paid: true } });
-          o.paid = true;
+          const claimed = await confirmOrderPaid(o.code);
+          if (claimed) o.paid = true;
         }
       } catch (err) {
-        console.error(`Wire reconciliation failed for order ${o.id}:`, err);
+        console.error(`Wire reconciliation failed for order ${o.code}:`, err);
       }
     })
   );

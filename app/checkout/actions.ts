@@ -76,6 +76,16 @@ export async function placeOrderAction(
 
   const session = await getCustomerSession();
 
+  // Stock is only reserved for real here, not decremented yet, when Wire
+  // payment is coming next — an order the customer never actually pays for
+  // (abandons the QPay page, closes the tab, etc.) must not lock up
+  // inventory another customer could buy. confirmOrderPaid() (lib/order-payment.ts)
+  // does the actual decrement once payment is confirmed, from three places:
+  // the Wire webhook, the checkout success page's poll, and the admin orders
+  // page's sweep. Without Wire configured there's no "paid" event coming at
+  // all (COD/manual-transfer flow), so that case still decrements immediately.
+  const usesOnlinePayment = !!process.env.WIRE_API_KEY;
+
   try {
     await prisma.$transaction(async (tx) => {
       await tx.order.create({
@@ -107,14 +117,16 @@ export async function placeOrderAction(
         },
       });
 
-      for (const [key, qty] of requestedQtyByVariant) {
-        const variant = variantByKey.get(key)!;
-        const result = await tx.productVariant.updateMany({
-          where: { id: variant.id, stock: { gte: qty } },
-          data: { stock: { decrement: qty } },
-        });
-        if (result.count === 0) {
-          throw new Error(`STOCK_CONFLICT:${key}`);
+      if (!usesOnlinePayment) {
+        for (const [key, qty] of requestedQtyByVariant) {
+          const variant = variantByKey.get(key)!;
+          const result = await tx.productVariant.updateMany({
+            where: { id: variant.id, stock: { gte: qty } },
+            data: { stock: { decrement: qty } },
+          });
+          if (result.count === 0) {
+            throw new Error(`STOCK_CONFLICT:${key}`);
+          }
         }
       }
     });
@@ -132,12 +144,14 @@ export async function placeOrderAction(
   revalidatePath("/admin/orders");
   for (const p of products) revalidatePath(`/products/${p.slug}`);
 
-  // The order (and its stock decrement) is already committed above regardless
-  // of what happens next — QPay is an additive online-payment option on top of
-  // the existing COD/manual-transfer flow, not a replacement for it. If Wire
-  // isn't configured, or the account/API call fails for any reason (e.g. no
+  // The order is already committed above regardless of what happens next —
+  // QPay is an additive online-payment option on top of the existing
+  // COD/manual-transfer flow, not a replacement for it. If Wire isn't
+  // configured, or the account/API call fails for any reason (e.g. no
   // connector attached yet on Wire's side), we fall back to the plain "order
-  // placed, we'll contact you" flow instead of losing the sale.
+  // placed, we'll contact you" flow instead of losing the sale — and since
+  // that means no "paid" event will ever arrive for this order, decrement its
+  // stock right here instead of leaving it stuck reserved forever.
   let checkoutUrl: string | undefined;
   if (process.env.WIRE_API_KEY) {
     try {
@@ -162,6 +176,13 @@ export async function placeOrderAction(
       checkoutUrl = wireSession.url;
     } catch (err) {
       console.error("Wire checkout creation failed, falling back to COD flow:", err);
+      for (const [key, qty] of requestedQtyByVariant) {
+        const variant = variantByKey.get(key)!;
+        await prisma.productVariant.updateMany({
+          where: { id: variant.id, stock: { gte: qty } },
+          data: { stock: { decrement: qty } },
+        });
+      }
     }
   }
 

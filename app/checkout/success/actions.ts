@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { getPaymentIntent } from "@/lib/wire";
+import { confirmOrderPaid } from "@/lib/order-payment";
 
 export async function getOrderPaymentStatusAction(orderCode: string): Promise<{ found: boolean; paid: boolean }> {
   const order = await prisma.order.findUnique({
@@ -19,7 +20,7 @@ export async function getOrderPaymentStatusAction(orderCode: string): Promise<{ 
     try {
       const intent = await getPaymentIntent(order.wirePaymentIntentId);
       if (intent.status === "succeeded") {
-        await prisma.order.update({ where: { code: orderCode }, data: { paid: true } });
+        await confirmOrderPaid(orderCode);
         return { found: true, paid: true };
       }
     } catch (err) {

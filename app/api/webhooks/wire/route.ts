@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { verifyWireSignature } from "@/lib/wire-webhook";
+import { confirmOrderPaid } from "@/lib/order-payment";
 
 type WireEvent = {
   id: string;
@@ -54,10 +55,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ received: true });
     }
 
-    await prisma.order.update({
-      where: { code: orderCode },
-      data: { paid: true, wirePaymentIntentId: event.data.object.id },
-    });
+    await confirmOrderPaid(orderCode, { wirePaymentIntentId: event.data.object.id });
   }
 
   // Always 2xx for events we recognize but don't act on (e.g. payment_intent.payment_failed) —
