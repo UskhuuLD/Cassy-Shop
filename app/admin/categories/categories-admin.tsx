@@ -77,7 +77,8 @@ export default function CategoriesAdmin({ initial }: { initial: CategoryRow[] })
         </form>
       )}
 
-      <div className="card mt-7 overflow-x-auto">
+      {/* Desktop/tablet: full table */}
+      <div className="card mt-7 hidden overflow-x-auto md:block">
         <table className="w-full min-w-[560px] text-left text-sm">
           <thead className="bg-[#f9edf2]">
             <tr>
@@ -125,6 +126,42 @@ export default function CategoriesAdmin({ initial }: { initial: CategoryRow[] })
             )}
           </tbody>
         </table>
+      </div>
+
+      {/* Mobile: one stacked card per category */}
+      <div className="mt-7 space-y-3 md:hidden">
+        {categories.map((c) =>
+          editingId === c.id ? (
+            <form key={c.id} action={(fd) => handleUpdate(c.id, fd)} className="card flex items-center gap-3 p-4">
+              <input name="name" defaultValue={c.name} required autoFocus className="input flex-1" />
+              <button className="btn btn-dark !px-4 !py-2 text-sm">ХАДГАЛАХ</button>
+              <button type="button" onClick={() => setEditingId(null)} className="rounded-full p-2 hover:bg-[#f9edf2]">
+                <X size={18} />
+              </button>
+            </form>
+          ) : (
+            <div key={c.id} className="card flex items-center justify-between gap-3 p-4">
+              <div className="min-w-0">
+                <p className="truncate font-semibold">{c.name}</p>
+                <p className="text-xs text-zinc-500">
+                  {c.slug} · {c._count.products} бараа
+                </p>
+              </div>
+              <div className="flex flex-none gap-2">
+                <button onClick={() => setEditingId(c.id)} className="rounded-full border border-[#eadde3] p-2 hover:bg-[#f9edf2]">
+                  <Pencil size={16} />
+                </button>
+                <button
+                  onClick={() => handleDelete(c.id)}
+                  disabled={isPending}
+                  className="rounded-full border border-[#eadde3] p-2 hover:bg-red-50"
+                >
+                  <Trash2 size={16} />
+                </button>
+              </div>
+            </div>
+          )
+        )}
       </div>
     </>
   );

@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { useMemo, useState, useTransition } from "react";
+import { Pencil, Plus, Search, Trash2 } from "lucide-react";
 import ProductForm from "./product-form";
 import { deactivateProductAction, deleteProductAction, toggleProductActiveAction } from "./actions";
 import type { PublicProduct } from "@/lib/products";
@@ -24,6 +24,17 @@ export default function ProductsAdmin({
   const [toast, setToast] = useState("");
   const [isPending, startTransition] = useTransition();
   const [confirmDelete, setConfirmDelete] = useState<{ product: PublicProduct; orderCount: number } | null>(null);
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [search, setSearch] = useState("");
+
+  const filteredProducts = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return products.filter((p) => {
+      if (categoryFilter !== "all" && p.categoryId !== categoryFilter) return false;
+      if (q && !p.name.toLowerCase().includes(q)) return false;
+      return true;
+    });
+  }, [products, categoryFilter, search]);
 
   function openAdd() {
     setEditing(undefined);
@@ -122,20 +133,56 @@ export default function ProductsAdmin({
         </div>
       ) : (
         <>
-          {/* Desktop/tablet: full table, scrolls horizontally past this width */}
-          <div className="card mt-7 hidden overflow-x-auto md:block">
-            <table className="w-full min-w-[860px] text-left text-sm">
-              <thead className="bg-[#f9edf2]">
-                <tr>
-                  {["Бараа", "Зураг", "Үнэ", "Нөөц", "Ангилал", "Төлөв", ""].map((h) => (
-                    <th key={h} className="p-4 font-semibold">
-                      {h}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {products.map((p) => (
+          <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
+            <label className="relative flex-1 sm:max-w-xs">
+              <Search size={16} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" />
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Барааны нэрээр хайх..."
+                className="input !pl-10"
+              />
+            </label>
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => setCategoryFilter("all")}
+                className={`filter-pill ${categoryFilter === "all" ? "active" : ""}`}
+              >
+                Бүгд
+              </button>
+              {categories.map((c) => (
+                <button
+                  key={c.id}
+                  onClick={() => setCategoryFilter(c.id)}
+                  className={`filter-pill ${categoryFilter === c.id ? "active" : ""}`}
+                >
+                  {c.name}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {filteredProducts.length === 0 ? (
+            <div className="card mt-4 p-12 text-center">
+              <p className="text-lg font-bold">Тохирох бараа олдсонгүй</p>
+              <p className="mt-2 text-sm text-zinc-500">Хайлт эсвэл ангиллын шүүлтүүрээ өөрчилж үзнэ үү.</p>
+            </div>
+          ) : (
+            <>
+              {/* Desktop/tablet: full table, scrolls horizontally past this width */}
+              <div className="card mt-4 hidden overflow-x-auto md:block">
+                <table className="w-full min-w-[860px] text-left text-sm">
+                  <thead className="bg-[#f9edf2]">
+                    <tr>
+                      {["Бараа", "Зураг", "Үнэ", "Нөөц", "Ангилал", "Төлөв", ""].map((h) => (
+                        <th key={h} className="p-4 font-semibold">
+                          {h}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredProducts.map((p) => (
                   <tr key={p.id} className="border-t border-[#eadde3]">
                     <td className="p-4 font-semibold">{p.name}</td>
                     <td className="p-4">
@@ -175,14 +222,14 @@ export default function ProductsAdmin({
                       </div>
                     </td>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
 
-          {/* Mobile: no horizontal scrolling — one stacked card per product */}
-          <div className="mt-7 space-y-4 md:hidden">
-            {products.map((p) => (
+              {/* Mobile: no horizontal scrolling — one stacked card per product */}
+              <div className="mt-4 space-y-4 md:hidden">
+                {filteredProducts.map((p) => (
               <div key={p.id} className="card flex gap-3 p-4">
                 <img
                   src={p.images[0]?.url || "/products/product-1.jpg"}
@@ -221,8 +268,10 @@ export default function ProductsAdmin({
                   </div>
                 </div>
               </div>
-            ))}
-          </div>
+                ))}
+              </div>
+            </>
+          )}
         </>
       )}
 

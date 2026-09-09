@@ -60,15 +60,15 @@ export default async function Admin() {
   return (
     <main className="container-page py-10">
       <AdminNav />
-      <div className="flex items-end justify-between">
+      <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between sm:gap-0">
         <div>
           <p className="text-xs font-bold tracking-[.2em] text-[#a76f83]">ADMIN</p>
-          <h1 className="serif mt-2 text-5xl">Dashboard</h1>
+          <h1 className="serif mt-2 text-4xl sm:text-5xl">Dashboard</h1>
         </div>
         <p className="text-sm text-zinc-500">{new Date().toLocaleDateString("mn-MN")}</p>
       </div>
 
-      <div className="mt-8 grid gap-4 md:grid-cols-4">
+      <div className="mt-8 grid grid-cols-2 gap-4 md:grid-cols-4">
         {[
           ["Нийт орлого", m(totalRevenue)],
           ["Нийт захиалга", totalOrders],
@@ -101,30 +101,51 @@ export default async function Admin() {
           {recentOrders.length === 0 ? (
             <p className="text-sm text-zinc-500">Одоогоор захиалга алга.</p>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[480px] text-left text-sm">
-                <thead className="text-zinc-500">
-                  <tr>
-                    <th className="pb-3 font-semibold">Дугаар</th>
-                    <th className="pb-3 font-semibold">Хэрэглэгч</th>
-                    <th className="pb-3 font-semibold">Дүн</th>
-                    <th className="pb-3 font-semibold">Төлөв</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {recentOrders.map((o) => (
-                    <tr key={o.id} className="border-t border-[#eadde3]">
-                      <td className="py-3 font-bold">{o.code}</td>
-                      <td className="py-3">{o.customer}</td>
-                      <td className="py-3 font-bold">{m(o.total)}</td>
-                      <td className="py-3">
-                        <span className="rounded-full bg-[#f9edf2] px-3 py-1 text-xs font-bold text-[#a76f83]">{o.status}</span>
-                      </td>
+            <>
+              {/* Desktop/tablet */}
+              <div className="hidden overflow-x-auto sm:block">
+                <table className="w-full min-w-[480px] text-left text-sm">
+                  <thead className="text-zinc-500">
+                    <tr>
+                      <th className="pb-3 font-semibold">Дугаар</th>
+                      <th className="pb-3 font-semibold">Хэрэглэгч</th>
+                      <th className="pb-3 font-semibold">Дүн</th>
+                      <th className="pb-3 font-semibold">Төлөв</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {recentOrders.map((o) => (
+                      <tr key={o.id} className="border-t border-[#eadde3]">
+                        <td className="py-3 font-bold">{o.code}</td>
+                        <td className="py-3">{o.customer}</td>
+                        <td className="py-3 font-bold">{m(o.total)}</td>
+                        <td className="py-3">
+                          <span className="rounded-full bg-[#f9edf2] px-3 py-1 text-xs font-bold text-[#a76f83]">{o.status}</span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Mobile: stacked rows, no horizontal scrolling */}
+              <div className="space-y-3 sm:hidden">
+                {recentOrders.map((o) => (
+                  <div key={o.id} className="flex items-center justify-between border-t border-[#eadde3] pt-3">
+                    <div>
+                      <p className="font-bold">{o.code}</p>
+                      <p className="text-xs text-zinc-500">{o.customer}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-bold">{m(o.total)}</p>
+                      <span className="mt-1 inline-block rounded-full bg-[#f9edf2] px-2 py-0.5 text-xs font-bold text-[#a76f83]">
+                        {o.status}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
           )}
         </div>
 
