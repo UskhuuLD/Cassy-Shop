@@ -2,6 +2,8 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getCustomerSession } from "@/lib/customer-auth";
 import { prisma } from "@/lib/prisma";
+import { getPaymentIntent } from "@/lib/wire";
+import { confirmOrderPaid } from "@/lib/order-payment";
 import type { OrderStatus } from "@prisma/client";
 
 const money = (n: number) => new Intl.NumberFormat("mn-MN").format(n) + "₮";
@@ -25,6 +27,27 @@ export default async function AccountOrdersPage() {
     orderBy: { createdAt: "desc" },
   });
 
+  // Same self-heal as the admin orders page: if Wire's webhook never arrived
+  // for one of this customer's orders, ask Wire directly and fix our record
+  // before deciding whether to show a "continue payment" button.
+  if (process.env.WIRE_API_KEY) {
+    await Promise.all(
+      orders
+        .filter((o) => !o.paid && o.wirePaymentIntentId)
+        .map(async (o) => {
+          try {
+            const intent = await getPaymentIntent(o.wirePaymentIntentId!);
+            if (intent.status === "succeeded") {
+              const claimed = await confirmOrderPaid(o.code);
+              if (claimed) o.paid = true;
+            }
+          } catch (err) {
+            console.error(`Wire reconciliation failed for order ${o.code}:`, err);
+          }
+        })
+    );
+  }
+
   return (
     <main className="container-page py-12">
       <h1 className="serif text-4xl">Миний захиалга</h1>
@@ -45,16 +68,27 @@ export default async function AccountOrdersPage() {
                   <p className="font-bold">Захиалга #{order.code}</p>
                   <p className="text-sm text-zinc-500">{dateFmt.format(order.createdAt)}</p>
                 </div>
-                <span className="rounded-full bg-[#f2dbe4] px-3 py-1 text-xs font-bold text-[#7a3352]">
-                  {statusLabel[order.status]}
-                </span>
+                <div className="flex flex-wrap items-center gap-2">
+                  {order.wirePaymentIntentId && (
+                    <span
+                      className={`rounded-full px-3 py-1 text-xs font-bold ${
+                        order.paid ? "bg-[#e8f5e9] text-[#2e7d32]" : "bg-amber-50 text-amber-700"
+                      }`}
+                    >
+                      {order.paid ? "Төлөгдсөн" : "Төлбөр хүлээгдэж буй"}
+                    </span>
+                  )}
+                  <span className="rounded-full bg-[#f2dbe4] px-3 py-1 text-xs font-bold text-[#7a3352]">
+                    {statusLabel[order.status]}
+                  </span>
+                </div>
               </div>
               <div className="mt-4 divide-y divide-[#eadde3]">
                 {order.items.map((item) => (
                   <div key={item.id} className="flex items-center gap-3 py-2.5 text-sm">
                     {item.image && <img src={item.image} alt="" className="h-12 w-9 rounded-lg object-cover" />}
                     <span className="flex-1">
-                      {item.name} {item.size ? `(${item.size})` : ""} × {item.qty}
+                      {item.name} {item.size ? `(${item.size}${item.color ? `, ${item.color}` : ""})` : ""} × {item.qty}
                     </span>
                     <span className="font-semibold">{money(item.price * item.qty)}</span>
                   </div>
@@ -64,6 +98,11 @@ export default async function AccountOrdersPage() {
                 <span>Нийт дүн</span>
                 <span>{money(order.total)}</span>
               </div>
+              {!order.paid && order.wireCheckoutUrl && order.status !== "CANCELLED" && (
+                <a href={order.wireCheckoutUrl} className="btn btn-dark mt-4 w-full">
+                  ТӨЛБӨРӨӨ ҮРГЭЛЖЛҮҮЛЭХ
+                </a>
+              )}
             </div>
           ))}
         </div>
