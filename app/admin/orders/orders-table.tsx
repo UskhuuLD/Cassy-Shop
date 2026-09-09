@@ -28,7 +28,7 @@ type OrderRow = {
   pickup: boolean;
   paid: boolean;
   wirePaymentIntentId: string | null;
-  items: { id: string; name: string; image: string; size: string; qty: number }[];
+  items: { id: string; name: string; image: string; size: string; color: string; qty: number }[];
 };
 
 function PaymentBadge({ paid, wirePaymentIntentId }: { paid: boolean; wirePaymentIntentId: string | null }) {
@@ -97,7 +97,8 @@ export default function OrdersTable({ orders }: { orders: OrderRow[] }) {
                         {item.name}
                         <br />
                         <span className="text-xs text-zinc-500">
-                          {item.size} × {item.qty}
+                          {item.size}
+                          {item.color && ` / ${item.color}`} × {item.qty}
                         </span>
                       </span>
                     </div>

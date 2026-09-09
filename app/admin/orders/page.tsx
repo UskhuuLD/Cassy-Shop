@@ -1,14 +1,40 @@
 import AdminNav from "@/components/admin-nav";
 import { prisma } from "@/lib/prisma";
+import { getPaymentIntent } from "@/lib/wire";
 import OrdersTable from "./orders-table";
 
 export const dynamic = "force-dynamic";
+
+// Self-heal orders whose Wire webhook never arrived (misconfigured endpoint,
+// dropped delivery, signature/timestamp mismatch, etc.) — same reconciliation
+// the checkout success page does, but here it covers every still-pending
+// order each time an admin opens this page, not just the one the customer
+// happens to revisit.
+async function reconcilePendingWireOrders(orders: { id: string; paid: boolean; wirePaymentIntentId: string | null }[]) {
+  if (!process.env.WIRE_API_KEY) return;
+  const pending = orders.filter((o) => !o.paid && o.wirePaymentIntentId);
+  await Promise.all(
+    pending.map(async (o) => {
+      try {
+        const intent = await getPaymentIntent(o.wirePaymentIntentId!);
+        if (intent.status === "succeeded") {
+          await prisma.order.update({ where: { id: o.id }, data: { paid: true } });
+          o.paid = true;
+        }
+      } catch (err) {
+        console.error(`Wire reconciliation failed for order ${o.id}:`, err);
+      }
+    })
+  );
+}
 
 export default async function OrdersPage() {
   const orders = await prisma.order.findMany({
     orderBy: { createdAt: "desc" },
     include: { items: true },
   });
+
+  await reconcilePendingWireOrders(orders);
 
   return (
     <main className="container-page py-10">
