@@ -62,25 +62,27 @@ export default async function Home() {
       </section>
 
       <section className="container-page py-16">
-        <div className="mb-8 flex items-end justify-between">
-          <div>
-            <p className="eyebrow">CASSY PICKS</p>
-            <h2 className="serif mt-2 text-4xl">New arrivals</h2>
-          </div>
-          <Link href="/products" className="text-sm font-bold underline">
-            Бүгдийг харах
-          </Link>
+        <div className="mb-8">
+          <p className="eyebrow">CASSY PICKS</p>
+          <h2 className="serif mt-2 text-4xl">New arrivals</h2>
         </div>
         {products.length === 0 ? (
           <div className="card p-12 text-center text-zinc-500">
             Одоогоор бараа алга. Admin хэсгээс эхний бараагаа нэмнэ үү.
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-5 md:grid-cols-3 lg:grid-cols-4">
-            {products.map((p) => (
-              <ProductCard key={p.id} p={p} />
-            ))}
-          </div>
+          <>
+            <div className="grid grid-cols-2 gap-5 md:grid-cols-3 lg:grid-cols-4">
+              {products.map((p) => (
+                <ProductCard key={p.id} p={p} />
+              ))}
+            </div>
+            <div className="mt-8 text-center">
+              <Link href="/products" className="btn btn-soft">
+                Бүгдийг харах
+              </Link>
+            </div>
+          </>
         )}
       </section>
 
