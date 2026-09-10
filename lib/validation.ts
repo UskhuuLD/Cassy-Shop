@@ -23,6 +23,7 @@ export const productSchema = z.object({
   isBestSeller: z.coerce.boolean().default(false),
   isComingSoon: z.coerce.boolean().default(false),
   comingSoonDays: z.coerce.number().int().min(1).max(365).optional().nullable(),
+  badge: z.string().trim().max(20, "Шошго 20 тэмдэгтээс ихгүй байх ёстой.").default(""),
 });
 
 export type ProductFormValues = z.infer<typeof productSchema>;

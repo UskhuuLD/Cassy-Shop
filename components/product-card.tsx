@@ -49,19 +49,22 @@ export default function ProductCard({ p }: { p: PublicProduct }) {
     setTimeout(() => setAdded(false), 1400);
   }
 
+  const customBadge = p.badge?.trim() || "";
   const badge = comingSoon
     ? comingSoonDaysLeft
       ? `ТУН УДАХГҮЙ · ${comingSoonDaysLeft} ХОНОГ`
       : "ТУН УДАХГҮЙ"
     : soldOut
       ? "SOLD OUT"
-      : p.salePrice
-        ? "SALE"
-        : p.isBestSeller
-          ? "BESTSELLER"
-          : p.isNew
-            ? "NEW"
-            : null;
+      : customBadge
+        ? customBadge
+        : p.salePrice
+          ? "SALE"
+          : p.isBestSeller
+            ? "BESTSELLER"
+            : p.isNew
+              ? "NEW"
+              : null;
 
   return (
     <article className="group">
@@ -97,7 +100,9 @@ export default function ProductCard({ p }: { p: PublicProduct }) {
                   ? "bg-[#2b2027] text-white"
                   : badge === "SALE"
                     ? "bg-[#c9536f] text-white"
-                    : "bg-white"
+                    : customBadge
+                      ? "bg-[#2b2027] text-white"
+                      : "bg-white"
             }`}
           >
             {badge}
