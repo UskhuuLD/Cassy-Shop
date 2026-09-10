@@ -4,6 +4,7 @@ import { getCustomerSession } from "@/lib/customer-auth";
 import { prisma } from "@/lib/prisma";
 import { getPaymentIntent } from "@/lib/wire";
 import { confirmOrderPaid } from "@/lib/order-payment";
+import { cldUrl } from "@/lib/image";
 import type { OrderStatus } from "@prisma/client";
 
 const money = (n: number) => new Intl.NumberFormat("mn-MN").format(n) + "₮";
@@ -86,7 +87,15 @@ export default async function AccountOrdersPage() {
               <div className="mt-4 divide-y divide-[#eadde3]">
                 {order.items.map((item) => (
                   <div key={item.id} className="flex items-center gap-3 py-2.5 text-sm">
-                    {item.image && <img src={item.image} alt="" className="h-12 w-9 rounded-lg object-cover" />}
+                    {item.image && (
+                      <img
+                        src={cldUrl(item.image, { w: 120, q: "auto:eco" })}
+                        loading="lazy"
+                        decoding="async"
+                        alt=""
+                        className="h-12 w-9 rounded-lg object-cover"
+                      />
+                    )}
                     <span className="flex-1">
                       {item.name} {item.size ? `(${item.size}${item.color ? `, ${item.color}` : ""})` : ""} × {item.qty}
                     </span>

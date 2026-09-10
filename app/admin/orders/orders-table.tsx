@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { updateOrderStatusAction, deleteOrderAction } from "./actions";
+import { cldUrl } from "@/lib/image";
 import type { OrderStatus } from "@prisma/client";
 
 const money = (n: number) => new Intl.NumberFormat("mn-MN").format(n) + "₮";
@@ -65,7 +66,15 @@ export default function OrdersTable({ orders }: { orders: OrderRow[] }) {
       <div className="space-y-2">
         {items.map((item) => (
           <div key={item.id} className="flex items-center gap-2">
-            {item.image && <img src={item.image} alt="" className="h-10 w-8 rounded object-cover" />}
+            {item.image && (
+              <img
+                src={cldUrl(item.image, { w: 120, q: "auto:eco" })}
+                loading="lazy"
+                decoding="async"
+                alt=""
+                className="h-10 w-8 rounded object-cover"
+              />
+            )}
             <span>
               {item.name}
               <br />

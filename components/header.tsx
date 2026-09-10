@@ -7,6 +7,7 @@ import { useWishlist } from "./wishlist-context";
 import { useCategories } from "./category-context";
 import { logoutAction } from "@/app/login/actions";
 import type { ShopInfo } from "@/lib/shop-settings";
+import { cldUrl } from "@/lib/image";
 
 const money = (n: number) => new Intl.NumberFormat("mn-MN").format(n) + "₮";
 
@@ -92,7 +93,7 @@ export default function Header({
                     onMouseDown={() => setQuery("")}
                     className="flex items-center gap-3 border-b border-[#f3e9ee] px-4 py-2.5 last:border-0 hover:bg-[#faf5f7]"
                   >
-                    <img src={p.image} alt="" className="h-10 w-8 rounded object-cover" />
+                    <img src={cldUrl(p.image, { w: 120, q: "auto:eco" })} loading="lazy" decoding="async" alt="" className="h-10 w-8 rounded object-cover" />
                     <span className="flex-1 text-sm">{p.name}</span>
                     <span className="text-xs font-bold text-[#a76f83]">{money(p.price)}</span>
                   </Link>
@@ -167,7 +168,7 @@ export default function Header({
                     }}
                     className="flex items-center gap-3 border-b border-[#f3e9ee] px-4 py-2.5 last:border-0"
                   >
-                    <img src={p.image} alt="" className="h-10 w-8 rounded object-cover" />
+                    <img src={cldUrl(p.image, { w: 120, q: "auto:eco" })} loading="lazy" decoding="async" alt="" className="h-10 w-8 rounded object-cover" />
                     <span className="flex-1 text-sm">{p.name}</span>
                     <span className="text-xs font-bold text-[#a76f83]">{money(p.price)}</span>
                   </Link>

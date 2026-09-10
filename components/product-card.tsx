@@ -6,6 +6,7 @@ import { useWishlist } from "./wishlist-context";
 import { useCart } from "./cart-context";
 import type { PublicProduct } from "@/lib/products";
 import { totalStock } from "@/lib/product-stock";
+import { cldUrl } from "@/lib/image";
 
 const money = (n: number) => new Intl.NumberFormat("mn-MN").format(n) + "₮";
 
@@ -77,7 +78,9 @@ export default function ProductCard({ p }: { p: PublicProduct }) {
             {images.map((img) => (
               <img
                 key={img.id}
-                src={img.url}
+                src={cldUrl(img.url, { w: 700 })}
+                loading="lazy"
+                decoding="async"
                 alt={p.name}
                 className={`aspect-[3/4] w-full flex-none snap-start object-cover ${soldOut ? "opacity-60 grayscale" : ""}`}
               />
@@ -85,7 +88,9 @@ export default function ProductCard({ p }: { p: PublicProduct }) {
           </div>
         ) : (
           <img
-            src={images[0].url}
+            src={cldUrl(images[0].url, { w: 700 })}
+            loading="lazy"
+            decoding="async"
             alt={p.name}
             className={`aspect-[3/4] w-full object-cover transition duration-500 group-hover:scale-[1.035] ${soldOut ? "opacity-60 grayscale" : ""}`}
           />

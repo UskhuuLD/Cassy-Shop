@@ -3,6 +3,7 @@ import { useRef, useState } from "react";
 import { useCart } from "./cart-context";
 import type { PublicProduct } from "@/lib/products";
 import { totalStock, variantStock as getVariantStock } from "@/lib/product-stock";
+import { cldUrl } from "@/lib/image";
 
 const money = (n: number) => new Intl.NumberFormat("mn-MN").format(n) + "₮";
 
@@ -52,10 +53,12 @@ export default function ProductDetail({ p }: { p: PublicProduct }) {
           onScroll={handleScroll}
           className="flex snap-x snap-mandatory overflow-x-auto rounded-[30px] bg-[#f5eeee] [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
-          {images.map((img) => (
+          {images.map((img, i) => (
             <img
               key={img.id}
-              src={img.url}
+              src={cldUrl(img.url, { w: 1000 })}
+              loading={i === 0 ? "eager" : "lazy"}
+              decoding="async"
               alt={p.name}
               className={`aspect-[4/5] w-full flex-none snap-start object-cover ${soldOut ? "opacity-60 grayscale" : ""}`}
             />
@@ -72,7 +75,13 @@ export default function ProductDetail({ p }: { p: PublicProduct }) {
                   activeIndex === i ? "border-[#2b2027]" : "border-transparent"
                 }`}
               >
-                <img src={img.url} alt="" className="h-full w-full object-cover" />
+                <img
+                  src={cldUrl(img.url, { w: 160, q: "auto:eco" })}
+                  loading="lazy"
+                  decoding="async"
+                  alt=""
+                  className="h-full w-full object-cover"
+                />
               </button>
             ))}
           </div>

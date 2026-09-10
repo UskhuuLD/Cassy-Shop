@@ -3,6 +3,7 @@
 import { FormEvent, useState } from "react";
 import { useCart } from "@/components/cart-context";
 import { shopInfo } from "@/lib/shop-info";
+import { cldUrl } from "@/lib/image";
 import { placeOrderAction } from "./actions";
 
 const money = (n: number) => new Intl.NumberFormat("mn-MN").format(n) + "₮";
@@ -107,7 +108,7 @@ export default function Checkout() {
           const price = item.product.salePrice ?? item.product.price;
           return (
             <div key={item.product.id + item.size + item.color} className="mt-4 flex gap-3">
-              <img src={item.product.image} alt={item.product.name} className="h-16 w-12 rounded-lg object-cover" />
+              <img src={cldUrl(item.product.image, { w: 120, q: "auto:eco" })} loading="lazy" decoding="async" alt={item.product.name} className="h-16 w-12 rounded-lg object-cover" />
               <div className="flex-1 text-sm">
                 <p className="font-semibold">{item.product.name}</p>
                 <p className="text-zinc-500">

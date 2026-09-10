@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Minus, Plus, Trash2 } from "lucide-react";
 import { useCart } from "@/components/cart-context";
 import { shopInfo } from "@/lib/shop-info";
+import { cldUrl } from "@/lib/image";
 
 const m = (n: number) => new Intl.NumberFormat("mn-MN").format(n) + "₮";
 
@@ -27,7 +28,7 @@ export default function Cart() {
               const price = x.product.salePrice ?? x.product.price;
               return (
                 <div key={x.product.id + x.size + x.color} className="card flex gap-4 p-4">
-                  <img src={x.product.image} className="h-36 w-28 rounded-2xl object-cover" />
+                  <img src={cldUrl(x.product.image, { w: 240 })} loading="lazy" decoding="async" className="h-36 w-28 rounded-2xl object-cover" />
                   <div className="flex flex-1 flex-col">
                     <div className="flex justify-between gap-3">
                       <div>

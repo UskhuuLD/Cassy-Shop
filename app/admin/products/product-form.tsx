@@ -4,48 +4,9 @@ import { useRef, useState } from "react";
 import { X, Upload, Loader2 } from "lucide-react";
 import { createProductAction, updateProductAction, uploadImageAction } from "./actions";
 import type { PublicProduct } from "@/lib/products";
+import { cldUrl, resizeImage } from "@/lib/image";
 
 type CategoryOption = { id: string; name: string };
-
-// Shrinks a photo to at most 1600px on its long side and re-encodes it as
-// JPEG q0.85 before it ever leaves the browser — phone camera photos are
-// routinely several MB, which made uploads slow and occasionally too big for
-// the server action's body limit. A few hundred KB uploads fast and still
-// looks fine at product-card/detail sizes.
-function resizeImage(file: File, maxDim = 1600, quality = 0.85): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    const objectUrl = URL.createObjectURL(file);
-    img.onload = () => {
-      URL.revokeObjectURL(objectUrl);
-      let { width, height } = img;
-      if (width > maxDim || height > maxDim) {
-        if (width > height) {
-          height = Math.round((height * maxDim) / width);
-          width = maxDim;
-        } else {
-          width = Math.round((width * maxDim) / height);
-          height = maxDim;
-        }
-      }
-      const canvas = document.createElement("canvas");
-      canvas.width = width;
-      canvas.height = height;
-      const ctx = canvas.getContext("2d");
-      if (!ctx) {
-        reject(new Error("Canvas дэмжигдэхгүй байна."));
-        return;
-      }
-      ctx.drawImage(img, 0, 0, width, height);
-      resolve(canvas.toDataURL("image/jpeg", quality));
-    };
-    img.onerror = () => {
-      URL.revokeObjectURL(objectUrl);
-      reject(new Error("Зургийг уншиж чадсангүй."));
-    };
-    img.src = objectUrl;
-  });
-}
 
 export default function ProductForm({
   product,
@@ -258,7 +219,7 @@ export default function ProductForm({
             {images.map((img, i) => (
               <div key={img.url + i} className="w-20">
                 <div className="relative h-20 w-20 overflow-hidden rounded-xl border border-[#eadde3]">
-                  <img src={img.url} className="h-full w-full object-cover" />
+                  <img src={cldUrl(img.url, { w: 200 })} loading="lazy" decoding="async" className="h-full w-full object-cover" />
                   <button
                     type="button"
                     onClick={() => setImages((v) => v.filter((_, idx) => idx !== i))}

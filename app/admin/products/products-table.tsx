@@ -6,6 +6,7 @@ import ProductForm from "./product-form";
 import { deactivateProductAction, deleteProductAction, toggleProductActiveAction } from "./actions";
 import type { PublicProduct } from "@/lib/products";
 import { totalStock } from "@/lib/product-stock";
+import { cldUrl } from "@/lib/image";
 
 const m = (n: number) => new Intl.NumberFormat("mn-MN").format(n) + "₮";
 
@@ -186,7 +187,12 @@ export default function ProductsAdmin({
                   <tr key={p.id} className="border-t border-[#eadde3]">
                     <td className="p-4 font-semibold">{p.name}</td>
                     <td className="p-4">
-                      <img src={p.images[0]?.url || "/products/product-1.jpg"} className="h-14 w-11 rounded-lg object-cover" />
+                      <img
+                        src={cldUrl(p.images[0]?.url, { w: 160, q: "auto:eco" }) || "/products/product-1.jpg"}
+                        loading="lazy"
+                        decoding="async"
+                        className="h-14 w-11 rounded-lg object-cover"
+                      />
                     </td>
                     <td className="p-4">
                       {p.salePrice ? (
@@ -232,7 +238,9 @@ export default function ProductsAdmin({
                 {filteredProducts.map((p) => (
               <div key={p.id} className="card flex gap-3 p-4">
                 <img
-                  src={p.images[0]?.url || "/products/product-1.jpg"}
+                  src={cldUrl(p.images[0]?.url, { w: 200, q: "auto:eco" }) || "/products/product-1.jpg"}
+                  loading="lazy"
+                  decoding="async"
                   className="h-20 w-16 flex-none rounded-lg object-cover"
                 />
                 <div className="min-w-0 flex-1">

@@ -3,6 +3,7 @@ import ProductCard from "@/components/product-card";
 import { getNewArrivals } from "@/lib/products";
 import { getSiteContent } from "@/lib/site-content";
 import { getShopInfo } from "@/lib/shop-settings";
+import { cldUrl } from "@/lib/image";
 import { Instagram, MapPin, Truck } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -15,7 +16,8 @@ export default async function Home() {
       <section className="container-page py-6">
         <div className="relative overflow-hidden rounded-[36px] bg-[#efd5df]">
           <img
-            src={content.heroImage}
+            src={cldUrl(content.heroImage, { w: 1600 })}
+            loading="eager"
             className="h-[620px] w-full object-cover object-top opacity-85"
             alt="Cassy collection"
           />
@@ -89,8 +91,18 @@ export default async function Home() {
       <section className="bg-[#f9edf2] py-20">
         <div className="container-page grid items-center gap-10 md:grid-cols-2">
           <div className="grid grid-cols-2 gap-3">
-            <img src={content.styleEditImage1} className="h-[430px] w-full rounded-[28px] object-cover" />
-            <img src={content.styleEditImage2} className="mt-12 h-[430px] w-full rounded-[28px] object-cover" />
+            <img
+              src={cldUrl(content.styleEditImage1, { w: 900 })}
+              loading="lazy"
+              decoding="async"
+              className="h-[430px] w-full rounded-[28px] object-cover"
+            />
+            <img
+              src={cldUrl(content.styleEditImage2, { w: 900 })}
+              loading="lazy"
+              decoding="async"
+              className="mt-12 h-[430px] w-full rounded-[28px] object-cover"
+            />
           </div>
           <div>
             <p className="eyebrow">CASSY STYLE EDIT</p>

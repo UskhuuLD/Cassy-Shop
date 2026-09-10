@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { Loader2, Upload } from "lucide-react";
 import { uploadImageAction } from "@/app/admin/products/actions";
+import { cldUrl, resizeImage } from "@/lib/image";
 import { updateSiteContentAction } from "./actions";
 
 type Slot = "heroImage" | "styleEditImage1" | "styleEditImage2";
@@ -25,13 +26,15 @@ export default function HomepageEditor({ initial }: { initial: Record<Slot, stri
     if (!file) return;
     setError("");
     setUploading(slot);
-    const dataUrl: string = await new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
-    const result = await uploadImageAction(dataUrl);
+    let result;
+    try {
+      const dataUrl = await resizeImage(file, 2000, 0.85);
+      result = await uploadImageAction(dataUrl);
+    } catch (err) {
+      setUploading(null);
+      setError(err instanceof Error ? err.message : "Зураг оруулахад алдаа гарлаа.");
+      return;
+    }
     setUploading(null);
     if ("error" in result) {
       setError(result.error);
@@ -66,7 +69,7 @@ export default function HomepageEditor({ initial }: { initial: Record<Slot, stri
             <p className="mb-2 text-sm font-bold">{s.label}</p>
             <p className="mb-3 text-xs text-zinc-500">{s.hint}</p>
             <div className="relative aspect-[4/5] w-full overflow-hidden rounded-2xl border border-[#eadde3] bg-[#f5eeee]">
-              <img src={images[s.key]} className="h-full w-full object-cover" />
+              <img src={cldUrl(images[s.key], { w: 500 })} loading="lazy" decoding="async" className="h-full w-full object-cover" />
               <label className="absolute inset-0 flex cursor-pointer items-center justify-center bg-black/0 text-transparent transition hover:bg-black/40 hover:text-white">
                 {uploading === s.key ? <Loader2 size={22} className="animate-spin" /> : <Upload size={22} />}
                 <input
