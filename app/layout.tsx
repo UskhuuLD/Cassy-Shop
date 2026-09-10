@@ -11,8 +11,23 @@ import { getShopInfo } from "@/lib/shop-settings";
 import { prisma } from "@/lib/prisma";
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://www.cassyshop.com"),
   title: "Cassy Online Shop",
   description: "Girls outfit online shop",
+  openGraph: {
+    title: "Cassy Online Shop",
+    description: "Girls outfit online shop",
+    url: "https://www.cassyshop.com",
+    siteName: "Cassy Online Shop",
+    type: "website",
+    images: [{ url: "/og-logo.png", width: 512, height: 512, alt: "Cassy shop" }],
+  },
+  twitter: {
+    card: "summary",
+    title: "Cassy Online Shop",
+    description: "Girls outfit online shop",
+    images: ["/og-logo.png"],
+  },
 };
 
 export const dynamic = "force-dynamic";
