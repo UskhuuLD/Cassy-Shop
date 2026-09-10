@@ -20,10 +20,10 @@ export const metadata: Metadata = {
     url: "https://www.cassyshop.com",
     siteName: "Cassy Online Shop",
     type: "website",
-    images: [{ url: "/og-logo.png", width: 1206, height: 632, alt: "Cassy shop" }],
+    images: [{ url: "/og-logo.png", width: 1200, height: 1200, alt: "Cassy shop" }],
   },
   twitter: {
-    card: "summary_large_image",
+    card: "summary",
     title: "Cassy Online Shop",
     description: "Girls outfit online shop",
     images: ["/og-logo.png"],
