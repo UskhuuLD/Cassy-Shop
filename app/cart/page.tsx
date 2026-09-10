@@ -64,14 +64,14 @@ export default function Cart() {
               <span>Барааны дүн</span>
               <span>{m(total)}</span>
             </div>
-            <div className="mt-3 flex justify-between text-sm">
-              <span>Хүргэлт</span>
+            <div className="mt-3 flex justify-between text-sm text-zinc-500">
+              <span>Хүргэлт (жолоочид бэлнээр)</span>
               <span>{deliveryFee ? m(deliveryFee) : "Үнэгүй"}</span>
             </div>
             <div className="my-5 border-t border-[#eadde3]" />
             <div className="flex justify-between text-lg font-bold">
-              <span>Нийт</span>
-              <span>{m(total + deliveryFee)}</span>
+              <span>Онлайн төлөх дүн</span>
+              <span>{m(total)}</span>
             </div>
             <Link href="/checkout" className="btn btn-dark mt-6 w-full">
               ЗАХИАЛГА ҮРГЭЛЖЛҮҮЛЭХ

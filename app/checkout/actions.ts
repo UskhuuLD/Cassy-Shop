@@ -65,8 +65,11 @@ export async function placeOrderAction(
     const product = productMap.get(item.productId)!;
     return sum + (product.salePrice ?? product.price) * item.qty;
   }, 0);
+  // Delivery is paid in cash to the driver on handover, not collected online —
+  // `total` (what the QPay charge is for) is products only. `deliveryFee` is
+  // still stored so the admin/driver knows how much to collect on delivery.
   const deliveryFee = customer.pickup ? 0 : subtotal >= shopInfo.freeDeliveryThreshold ? 0 : shopInfo.deliveryFee;
-  const total = subtotal + deliveryFee;
+  const total = subtotal;
   const code = `CS-${Date.now().toString().slice(-8)}`;
 
   const social = [customer.instagram && `IG: ${customer.instagram}`, customer.facebook && `FB: ${customer.facebook}`]

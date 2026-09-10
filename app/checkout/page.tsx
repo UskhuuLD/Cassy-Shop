@@ -13,8 +13,10 @@ export default function Checkout() {
   const [orderId, setOrderId] = useState("");
   const [error, setError] = useState("");
   const [pending, setPending] = useState(false);
+  // Delivery is paid to the driver in cash on handover — the online charge
+  // covers products only.
   const deliveryFee = total >= shopInfo.freeDeliveryThreshold ? 0 : shopInfo.deliveryFee;
-  const grandTotal = total + deliveryFee;
+  const grandTotal = total;
 
   async function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -87,7 +89,8 @@ export default function Checkout() {
         <div className="mt-3 rounded-2xl border border-[#eadde3] p-5">
           <p className="font-bold">Хаягаар хүргэнэ</p>
           <p className="mt-1 text-sm text-zinc-500">
-            Хүргэлтийн төлбөр нэмэгдэнэ. Захиалгаа баталгаажуулмагц QPay төлбөрийн хуудас руу шилжинэ.
+            Онлайнаар зөвхөн барааны үнийг төлнө. Хүргэлтийн төлбөрийг бараагаа хүлээж авахдаа жолоочид бэлнээр өгнө үү.
+            Захиалгаа баталгаажуулмагц QPay төлбөрийн хуудас руу шилжинэ.
           </p>
         </div>
 
@@ -121,12 +124,12 @@ export default function Checkout() {
             <span>Бараа</span>
             <span>{money(total)}</span>
           </div>
-          <div className="flex justify-between">
-            <span>Хүргэлт</span>
+          <div className="flex justify-between text-zinc-500">
+            <span>Хүргэлт (жолоочид бэлнээр)</span>
             <span>{deliveryFee ? money(deliveryFee) : "Үнэгүй"}</span>
           </div>
           <div className="flex justify-between pt-2 text-base font-bold">
-            <span>Нийт</span>
+            <span>Онлайн төлөх дүн</span>
             <span>{money(grandTotal)}</span>
           </div>
         </div>
