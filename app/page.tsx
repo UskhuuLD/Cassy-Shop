@@ -39,7 +39,7 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className="container-page grid gap-6 py-10 md:grid-cols-3 md:gap-4 md:py-6">
+      <section className="container-page grid gap-3 py-6 md:grid-cols-3 md:gap-4 md:py-6">
         <div className="info-strip">
           <Truck />
           <div>
