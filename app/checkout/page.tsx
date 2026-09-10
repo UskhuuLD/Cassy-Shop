@@ -89,7 +89,7 @@ export default function Checkout() {
         <div className="mt-3 rounded-2xl border border-[#eadde3] p-5">
           <p className="font-bold">Хаягаар хүргэнэ</p>
           <p className="mt-1 text-sm text-zinc-500">
-            Онлайнаар зөвхөн барааны үнийг төлнө. Хүргэлтийн төлбөрийг бараагаа хүлээж авахдаа жолоочид бэлнээр өгнө үү.
+            Онлайнаар зөвхөн барааны үнийг төлнө. Хүргэлтийн төлбөрийг бараагаа хүлээж авахдаа жолоочид өгнө үү.
             Захиалгаа баталгаажуулмагц QPay төлбөрийн хуудас руу шилжинэ.
           </p>
         </div>
@@ -125,7 +125,7 @@ export default function Checkout() {
             <span>{money(total)}</span>
           </div>
           <div className="flex justify-between text-zinc-500">
-            <span>Хүргэлт (жолоочид бэлнээр)</span>
+            <span>Хүргэлт (жолоочид өгнө үү)</span>
             <span>{deliveryFee ? money(deliveryFee) : "Үнэгүй"}</span>
           </div>
           <div className="flex justify-between pt-2 text-base font-bold">

@@ -65,7 +65,7 @@ export default function Cart() {
               <span>{m(total)}</span>
             </div>
             <div className="mt-3 flex justify-between text-sm text-zinc-500">
-              <span>Хүргэлт (жолоочид бэлнээр)</span>
+              <span>Хүргэлт (жолоочид өгнө үү)</span>
               <span>{deliveryFee ? m(deliveryFee) : "Үнэгүй"}</span>
             </div>
             <div className="my-5 border-t border-[#eadde3]" />
