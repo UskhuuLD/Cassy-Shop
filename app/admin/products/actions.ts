@@ -94,7 +94,7 @@ function parseProductForm(formData: FormData) {
     isBestSeller: formData.get("isBestSeller") === "on" || formData.get("isBestSeller") === "true",
     isComingSoon: formData.get("isComingSoon") === "on" || formData.get("isComingSoon") === "true",
     comingSoonDays: formData.get("comingSoonDays") ? formData.get("comingSoonDays") : null,
-    badge: formData.get("badge") || "",
+    isMadeToOrder: formData.get("isMadeToOrder") === "on" || formData.get("isMadeToOrder") === "true",
   });
 }
 
@@ -131,7 +131,7 @@ export async function createProductAction(formData: FormData): Promise<ActionRes
       isBestSeller: data.isBestSeller,
       isComingSoon: data.isComingSoon,
       comingSoonUntil: computeComingSoonUntil(data.isComingSoon, data.comingSoonDays, null),
-      badge: data.badge,
+      isMadeToOrder: data.isMadeToOrder,
       images: { create: data.images.map((img, position) => ({ url: img.url, color: img.color, position })) },
       variants: { create: data.variants },
     },
@@ -173,7 +173,7 @@ export async function updateProductAction(id: string, formData: FormData): Promi
           isBestSeller: data.isBestSeller,
         isComingSoon: data.isComingSoon,
         comingSoonUntil: computeComingSoonUntil(data.isComingSoon, data.comingSoonDays, existing.comingSoonUntil),
-        badge: data.badge,
+        isMadeToOrder: data.isMadeToOrder,
         images: { create: data.images.map((img, position) => ({ url: img.url, color: img.color, position })) },
         variants: { create: data.variants },
       },

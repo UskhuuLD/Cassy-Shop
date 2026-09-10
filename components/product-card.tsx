@@ -49,15 +49,14 @@ export default function ProductCard({ p }: { p: PublicProduct }) {
     setTimeout(() => setAdded(false), 1400);
   }
 
-  const customBadge = p.badge?.trim() || "";
   const badge = comingSoon
     ? comingSoonDaysLeft
       ? `ТУН УДАХГҮЙ · ${comingSoonDaysLeft} ХОНОГ`
       : "ТУН УДАХГҮЙ"
     : soldOut
       ? "SOLD OUT"
-      : customBadge
-        ? customBadge
+      : p.isMadeToOrder
+        ? "ЗАХИАЛГААР ИРНЭ"
         : p.salePrice
           ? "SALE"
           : p.isBestSeller
@@ -100,8 +99,8 @@ export default function ProductCard({ p }: { p: PublicProduct }) {
                   ? "bg-[#2b2027] text-white"
                   : badge === "SALE"
                     ? "bg-[#c9536f] text-white"
-                    : customBadge
-                      ? "bg-[#2b2027] text-white"
+                    : p.isMadeToOrder
+                      ? "bg-[#a76f83] text-white"
                       : "bg-white"
             }`}
           >

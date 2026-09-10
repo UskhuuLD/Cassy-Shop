@@ -291,20 +291,6 @@ export default function ProductForm({
           </div>
         </div>
 
-        <label className="md:col-span-2">
-          <span className="mb-1 block text-sm font-bold">Онцгой шошго / badge (заавал биш)</span>
-          <input
-            name="badge"
-            defaultValue={product?.badge ?? ""}
-            maxLength={20}
-            className="input"
-            placeholder="жнь: LIMITED, ШИНЭ ЗАГВАР"
-          />
-          <span className="mt-1 block text-xs text-zinc-500">
-            Барааны зураг дээр гарах жижиг шошго. Хоосон орхивол автомат шошго (SALE/NEW/BESTSELLER) харагдана.
-          </span>
-        </label>
-
         <div className="flex flex-wrap gap-5 md:col-span-2">
           <label className="flex items-center gap-2 text-sm font-semibold">
             <input type="checkbox" name="isActive" defaultChecked={product?.isActive ?? true} /> Идэвхтэй (дэлгүүрт харагдана)
@@ -314,6 +300,9 @@ export default function ProductForm({
           </label>
           <label className="flex items-center gap-2 text-sm font-semibold">
             <input type="checkbox" name="isBestSeller" defaultChecked={product?.isBestSeller} /> BEST SELLER badge
+          </label>
+          <label className="flex items-center gap-2 text-sm font-semibold">
+            <input type="checkbox" name="isMadeToOrder" defaultChecked={product?.isMadeToOrder} /> Захиалгаар ирнэ badge
           </label>
           <label className="flex items-center gap-2 text-sm font-semibold">
             <input

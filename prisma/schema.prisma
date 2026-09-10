@@ -78,9 +78,9 @@ model Product {
   isNew        Boolean  @default(false)
   isBestSeller Boolean  @default(false)
   isComingSoon Boolean  @default(false)
-  // Free-text badge label an admin can put on the product card (e.g.
-  // "LIMITED", "ШИНЭ ЗАГВАР"). Empty = no custom badge.
-  badge        String   @default("")
+  // "ЗАХИАЛГААР ИРНЭ" badge — item is still orderable but made/sourced on
+  // demand rather than in stock.
+  isMadeToOrder Boolean @default(false)
   // When set, the "coming soon" badge auto-expires at this time instead of
   // staying on until an admin manually unchecks isComingSoon. Computed
   // server-side from the admin form's day count (now + N days).
