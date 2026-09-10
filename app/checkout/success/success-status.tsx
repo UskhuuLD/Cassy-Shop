@@ -60,6 +60,9 @@ export default function SuccessStatus({ orderCode }: { orderCode: string }) {
         <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-[#f2dbe4] text-2xl">✓</div>
         <h1 className="serif mt-5 text-4xl">Төлбөр амжилттай</h1>
         <p className="mt-3 text-zinc-600">Таны захиалга баталгаажлаа. Тантай удахгүй холбогдоно.</p>
+        <p className="mx-auto mt-4 max-w-sm rounded-2xl bg-[#f9edf2] px-4 py-3 text-sm font-semibold text-[#7a3352]">
+          Захиалга 24–72 цагийн дотор хүргэгдэнэ.
+        </p>
       </>
     );
   }
