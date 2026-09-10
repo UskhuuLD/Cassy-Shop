@@ -8,7 +8,7 @@ import { Instagram, MapPin, Truck } from "lucide-react";
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
-  const [products, content, shopInfo] = await Promise.all([getNewArrivals(8), getSiteContent(), getShopInfo()]);
+  const [products, content, shopInfo] = await Promise.all([getNewArrivals(20), getSiteContent(), getShopInfo()]);
 
   return (
     <main>
