@@ -12,7 +12,7 @@ async function getLast7DaysRevenue(): Promise<RevenuePoint[]> {
   since.setHours(0, 0, 0, 0);
 
   const orders = await prisma.order.findMany({
-    where: { createdAt: { gte: since }, status: { not: "CANCELLED" } },
+    where: { createdAt: { gte: since }, paid: true, status: { not: "CANCELLED" } },
     select: { createdAt: true, total: true },
   });
 
@@ -33,13 +33,16 @@ async function getLast7DaysRevenue(): Promise<RevenuePoint[]> {
 }
 
 export default async function Admin() {
-  const [totalProducts, activeProducts, outOfStock, totalOrders, revenueAgg, revenueData, bestSellers] =
+  const [totalProducts, activeProducts, outOfStock, totalOrders, paidOrders, revenueAgg, revenueData, bestSellers] =
     await Promise.all([
       prisma.product.count(),
       prisma.product.count({ where: { isActive: true } }),
       prisma.product.count({ where: { variants: { none: { stock: { gt: 0 } } } } }),
       prisma.order.count(),
-      prisma.order.aggregate({ _sum: { total: true }, where: { status: { not: "CANCELLED" } } }),
+      prisma.order.count({ where: { paid: true, status: { not: "CANCELLED" } } }),
+      // Revenue only counts orders that are actually paid — a placed/confirmed
+      // but unpaid order isn't income yet.
+      prisma.order.aggregate({ _sum: { total: true }, where: { paid: true, status: { not: "CANCELLED" } } }),
       getLast7DaysRevenue(),
       prisma.orderItem.groupBy({
         by: ["productId", "name"],
@@ -50,7 +53,7 @@ export default async function Admin() {
     ]);
 
   const totalRevenue = revenueAgg._sum.total ?? 0;
-  const avgOrder = totalOrders ? Math.round(totalRevenue / totalOrders) : 0;
+  const avgOrder = paidOrders ? Math.round(totalRevenue / paidOrders) : 0;
 
   const recentOrders = await prisma.order.findMany({
     orderBy: { createdAt: "desc" },
@@ -70,7 +73,7 @@ export default async function Admin() {
 
       <div className="mt-8 grid grid-cols-2 gap-4 md:grid-cols-4">
         {[
-          ["Нийт орлого", m(totalRevenue)],
+          ["Нийт орлого (төлөгдсөн)", m(totalRevenue)],
           ["Нийт захиалга", totalOrders],
           ["Идэвхтэй бараа", `${activeProducts}/${totalProducts}`],
           ["Дуусаж буй бараа", outOfStock],
@@ -85,7 +88,7 @@ export default async function Admin() {
       <div className="card mt-6 p-6">
         <div className="mb-6">
           <h2 className="text-xl font-bold">7 хоногийн орлого</h2>
-          <p className="text-sm text-zinc-500">Цуцлагдаагүй захиалгын дүнгээр тооцов. Дундаж захиалга: {m(avgOrder || 0)}</p>
+          <p className="text-sm text-zinc-500">Төлбөр төлөгдсөн захиалгын дүнгээр тооцов. Дундаж захиалга: {m(avgOrder || 0)}</p>
         </div>
         <RevenueChart data={revenueData} />
       </div>
