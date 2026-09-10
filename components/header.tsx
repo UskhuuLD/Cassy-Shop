@@ -1,7 +1,20 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Heart, Menu, Search, ShoppingBag, User, X } from "lucide-react";
+import {
+  ChevronDown,
+  ClipboardList,
+  Flame,
+  Heart,
+  HelpCircle,
+  LayoutGrid,
+  Menu,
+  Package,
+  Search,
+  ShoppingBag,
+  User,
+  X,
+} from "lucide-react";
 import { useCart } from "./cart-context";
 import { useWishlist } from "./wishlist-context";
 import { useCategories } from "./category-context";
@@ -24,6 +37,7 @@ export default function Header({
   const { ids } = useWishlist();
   const categories = useCategories();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [catOpen, setCatOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
@@ -175,18 +189,83 @@ export default function Header({
                 ))}
               </div>
             )}
-            <nav className="mt-4 flex flex-col gap-1 text-sm font-semibold">
-              {navLinks.map((l) => (
+            <p className="mb-2 mt-5 text-xs font-bold tracking-wider text-zinc-400">АНГИЛАЛ</p>
+            <div className="space-y-1">
+              <Link
+                href="/products"
+                onClick={() => setMenuOpen(false)}
+                className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold hover:bg-[#f9edf2]"
+              >
+                <Package size={18} className="text-zinc-400" /> Бүх бараа
+              </Link>
+              <button
+                onClick={() => setCatOpen((v) => !v)}
+                className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold hover:bg-[#f9edf2]"
+              >
+                <LayoutGrid size={18} className="text-zinc-400" /> Ангилал
+                <ChevronDown
+                  size={16}
+                  className={`ml-auto text-zinc-400 transition-transform ${catOpen ? "rotate-180" : ""}`}
+                />
+              </button>
+              {catOpen && (
+                <div className="ml-9 space-y-0.5 border-l border-[#eadde3] pl-3">
+                  {categories.map((c) => (
+                    <Link
+                      key={c.id}
+                      href={`/products?category=${c.slug}`}
+                      onClick={() => setMenuOpen(false)}
+                      className="block rounded-lg px-3 py-2 text-sm hover:bg-[#f9edf2]"
+                    >
+                      {c.name}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <p className="mb-2 mt-5 text-xs font-bold tracking-wider text-zinc-400">БУСАД</p>
+            <div className="space-y-1">
+              <Link
+                href="/products?sale=1"
+                onClick={() => setMenuOpen(false)}
+                className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold hover:bg-[#f9edf2]"
+              >
+                <Flame size={18} className="text-zinc-400" /> Хямдрал
+                <span className="ml-auto rounded-full bg-[#c9536f] px-2 py-0.5 text-[10px] font-bold text-white">%</span>
+              </Link>
+              <Link
+                href="/wishlist"
+                onClick={() => setMenuOpen(false)}
+                className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold hover:bg-[#f9edf2]"
+              >
+                <Heart size={18} className="text-zinc-400" /> Хүслийн жагсаалт
+              </Link>
+              <Link
+                href="/faq"
+                onClick={() => setMenuOpen(false)}
+                className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold hover:bg-[#f9edf2]"
+              >
+                <HelpCircle size={18} className="text-zinc-400" /> Түгээмэл асуулт
+              </Link>
+              {customer ? (
                 <Link
-                  key={l.label}
-                  href={l.href}
+                  href="/account/orders"
                   onClick={() => setMenuOpen(false)}
-                  className={`rounded-xl px-3 py-2.5 hover:bg-[#f9edf2] ${l.accent ? "text-[#c9536f]" : ""}`}
+                  className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold hover:bg-[#f9edf2]"
                 >
-                  {l.label}
+                  <ClipboardList size={18} className="text-zinc-400" /> Миний захиалга
                 </Link>
-              ))}
-            </nav>
+              ) : (
+                <Link
+                  href="/login"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold hover:bg-[#f9edf2]"
+                >
+                  <User size={18} className="text-zinc-400" /> Нэвтрэх
+                </Link>
+              )}
+            </div>
           </div>
         )}
       </header>
