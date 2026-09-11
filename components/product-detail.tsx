@@ -60,7 +60,7 @@ export default function ProductDetail({ p }: { p: PublicProduct }) {
               loading={i === 0 ? "eager" : "lazy"}
               decoding="async"
               alt={p.name}
-              className={`aspect-[4/5] w-full flex-none snap-start object-cover ${soldOut ? "opacity-60 grayscale" : ""}`}
+              className="aspect-[4/5] w-full flex-none snap-start object-cover"
             />
           ))}
         </div>
@@ -100,9 +100,9 @@ export default function ProductDetail({ p }: { p: PublicProduct }) {
           <p>✓ Хот дотор хүргэлт</p>
           <p className="mt-2">
             {soldOut ? (
-              <span className="font-bold text-red-600">SOLD OUT — түр дууссан</span>
+              <span className="font-bold text-[#a76f83]">ЗАХИАЛГААР ИРНЭ — таны захиалгыг тусгайлан авчирна</span>
             ) : selectedStock <= 0 ? (
-              <span className="font-bold text-red-600">SOLD OUT — энэ хэмжээ/өнгө түр дууссан</span>
+              <span className="font-bold text-[#a76f83]">ЗАХИАЛГААР ИРНЭ — энэ хэмжээ/өнгө захиалгаар ирнэ</span>
             ) : (
               <>✓ Үлдэгдэл: {selectedStock} ширхэг</>
             )}
@@ -141,37 +141,27 @@ export default function ProductDetail({ p }: { p: PublicProduct }) {
             </div>
           </>
         )}
-        {soldOut ? (
-          <button disabled className="btn w-full cursor-not-allowed bg-zinc-200 text-zinc-500">
-            SOLD OUT
-          </button>
-        ) : selectedStock <= 0 ? (
-          <button disabled className="btn w-full cursor-not-allowed bg-zinc-200 text-zinc-500">
-            SOLD OUT
-          </button>
-        ) : (
-          <button
-            onClick={() => {
-              add(
-                {
-                  id: p.id,
-                  slug: p.slug,
-                  name: p.name,
-                  price: p.price,
-                  salePrice: p.salePrice,
-                  image: activeImage,
-                },
-                size,
-                color
-              );
-              setDone(true);
-              setTimeout(() => setDone(false), 1600);
-            }}
-            className="btn btn-dark w-full"
-          >
-            {done ? "САГСАНД НЭМЭГДЛЭЭ ✓" : "САГСАНД НЭМЭХ"}
-          </button>
-        )}
+        <button
+          onClick={() => {
+            add(
+              {
+                id: p.id,
+                slug: p.slug,
+                name: p.name,
+                price: p.price,
+                salePrice: p.salePrice,
+                image: activeImage,
+              },
+              size,
+              color
+            );
+            setDone(true);
+            setTimeout(() => setDone(false), 1600);
+          }}
+          className="btn btn-dark w-full"
+        >
+          {done ? "САГСАНД НЭМЭГДЛЭЭ ✓" : "САГСАНД НЭМЭХ"}
+        </button>
       </div>
     </>
   );

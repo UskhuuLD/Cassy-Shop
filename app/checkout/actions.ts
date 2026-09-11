@@ -44,6 +44,10 @@ export async function placeOrderAction(
     requestedQtyByVariant.set(key, (requestedQtyByVariant.get(key) || 0) + item.qty);
   }
 
+  // A variant that's out of (or short on) stock no longer blocks the order —
+  // it becomes a захиалгаар ирнэ (made-to-order/backorder) item instead of a
+  // lost sale. Only a genuinely invalid combo (not one of the product's
+  // actual size/color options) is rejected.
   const variantByKey = new Map<string, { id: string; stock: number }>();
   for (const [key, qty] of requestedQtyByVariant) {
     const [productId, size, color] = key.split("::");
@@ -52,10 +56,10 @@ export async function placeOrderAction(
       return { ok: false, message: "Сагс дахь зарим бараа дэлгүүрээс хасагдсан байна. Сагсаа шинэчилнэ үү." };
     }
     const variant = product.variants.find((v) => v.size === size && v.color === color);
-    if (!variant || variant.stock < qty) {
+    if (!variant) {
       return {
         ok: false,
-        message: `"${product.name}" (${size}${color ? ", " + color : ""}) үлдэгдэл хүрэлцэхгүй байна (үлдэгдэл: ${variant?.stock ?? 0}).`,
+        message: `"${product.name}" (${size}${color ? ", " + color : ""}) сонголт олдсонгүй. Сагсаа шинэчилнэ үү.`,
       };
     }
     variantByKey.set(key, variant);
@@ -121,23 +125,18 @@ export async function placeOrderAction(
       });
 
       if (!usesOnlinePayment) {
+        // gte guard just means a variant already at/below 0 stops decrementing
+        // further — it doesn't block the order (захиалгаар ирнэ / backorder).
         for (const [key, qty] of requestedQtyByVariant) {
           const variant = variantByKey.get(key)!;
-          const result = await tx.productVariant.updateMany({
+          await tx.productVariant.updateMany({
             where: { id: variant.id, stock: { gte: qty } },
             data: { stock: { decrement: qty } },
           });
-          if (result.count === 0) {
-            throw new Error(`STOCK_CONFLICT:${key}`);
-          }
         }
       }
     });
-  } catch (err) {
-    const message = err instanceof Error ? err.message : "";
-    if (message.startsWith("STOCK_CONFLICT")) {
-      return { ok: false, message: "Захиалга өгөх завсарт үлдэгдэл дуусчихлаа. Сагсаа шинэчлээд дахин оролдоно уу." };
-    }
+  } catch {
     return { ok: false, message: "Захиалга үүсгэхэд алдаа гарлаа. Дахин оролдоно уу." };
   }
 

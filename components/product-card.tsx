@@ -50,21 +50,23 @@ export default function ProductCard({ p }: { p: PublicProduct }) {
     setTimeout(() => setAdded(false), 1400);
   }
 
+  // A sold-out product isn't blocked from purchase — it just becomes a
+  // захиалгаар ирнэ (made-to-order/backorder) item instead of a lost sale.
+  const madeToOrder = soldOut || p.isMadeToOrder;
+
   const badge = comingSoon
     ? comingSoonDaysLeft
       ? `ТУН УДАХГҮЙ · ${comingSoonDaysLeft} ХОНОГ`
       : "ТУН УДАХГҮЙ"
-    : soldOut
-      ? "SOLD OUT"
-      : p.isMadeToOrder
-        ? "ЗАХИАЛГААР ИРНЭ"
-        : p.salePrice
-          ? "SALE"
-          : p.isBestSeller
-            ? "BESTSELLER"
-            : p.isNew
-              ? "NEW"
-              : null;
+    : madeToOrder
+      ? "ЗАХИАЛГААР ИРНЭ"
+      : p.salePrice
+        ? "SALE"
+        : p.isBestSeller
+          ? "BESTSELLER"
+          : p.isNew
+            ? "NEW"
+            : null;
 
   return (
     <article className="group">
@@ -82,7 +84,7 @@ export default function ProductCard({ p }: { p: PublicProduct }) {
                 loading="lazy"
                 decoding="async"
                 alt={p.name}
-                className={`aspect-[3/4] w-full flex-none snap-start object-cover ${soldOut ? "opacity-60 grayscale" : ""}`}
+                className="aspect-[3/4] w-full flex-none snap-start object-cover"
               />
             ))}
           </div>
@@ -92,7 +94,7 @@ export default function ProductCard({ p }: { p: PublicProduct }) {
             loading="lazy"
             decoding="async"
             alt={p.name}
-            className={`aspect-[3/4] w-full object-cover transition duration-500 group-hover:scale-[1.035] ${soldOut ? "opacity-60 grayscale" : ""}`}
+            className="aspect-[3/4] w-full object-cover transition duration-500 group-hover:scale-[1.035]"
           />
         )}
         {badge && (
@@ -100,13 +102,11 @@ export default function ProductCard({ p }: { p: PublicProduct }) {
             className={`absolute left-3 top-3 rounded-full px-3 py-1 text-[10px] font-bold tracking-wider ${
               comingSoon
                 ? "bg-[#a76f83] text-white"
-                : soldOut
-                  ? "bg-[#2b2027] text-white"
-                  : badge === "SALE"
-                    ? "bg-[#c9536f] text-white"
-                    : p.isMadeToOrder
-                      ? "bg-[#a76f83] text-white"
-                      : "bg-white"
+                : badge === "SALE"
+                  ? "bg-[#c9536f] text-white"
+                  : madeToOrder
+                    ? "bg-[#a76f83] text-white"
+                    : "bg-white"
             }`}
           >
             {badge}
@@ -141,15 +141,13 @@ export default function ProductCard({ p }: { p: PublicProduct }) {
           <span className={p.salePrice ? "text-[#c9536f]" : ""}>{money(displayPrice)}</span>
           {p.salePrice && <span className="text-zinc-400 line-through">{money(p.price)}</span>}
         </div>
-        {!soldOut && (
-          <button
-            onClick={quickAdd}
-            className="mt-3 flex w-full items-center justify-center gap-2 rounded-full border border-[#eadde3] py-2.5 text-xs font-bold text-[#2b2027] transition hover:bg-[#2b2027] hover:text-white"
-          >
-            <ShoppingBag size={15} />
-            {added ? "НЭМЭГДЛЭЭ ✓" : "Сагсанд нэмэх"}
-          </button>
-        )}
+        <button
+          onClick={quickAdd}
+          className="mt-3 flex w-full items-center justify-center gap-2 rounded-full border border-[#eadde3] py-2.5 text-xs font-bold text-[#2b2027] transition hover:bg-[#2b2027] hover:text-white"
+        >
+          <ShoppingBag size={15} />
+          {added ? "НЭМЭГДЛЭЭ ✓" : "Сагсанд нэмэх"}
+        </button>
       </div>
     </article>
   );
