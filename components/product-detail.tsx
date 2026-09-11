@@ -100,9 +100,13 @@ export default function ProductDetail({ p }: { p: PublicProduct }) {
           <p>✓ Хот дотор хүргэлт</p>
           <p className="mt-2">
             {soldOut ? (
-              <span className="font-bold text-[#a76f83]">ЗАХИАЛГААР ИРНЭ — таны захиалгыг тусгайлан авчирна</span>
+              <span className="font-bold text-[#a76f83]">
+                SOLD OUT · ЗАХИАЛГААР ИРНЭ — таны захиалгыг тусгайлан авчирна
+              </span>
             ) : selectedStock <= 0 ? (
-              <span className="font-bold text-[#a76f83]">ЗАХИАЛГААР ИРНЭ — энэ хэмжээ/өнгө захиалгаар ирнэ</span>
+              <span className="font-bold text-[#a76f83]">
+                SOLD OUT · ЗАХИАЛГААР ИРНЭ — энэ хэмжээ/өнгө захиалгаар ирнэ
+              </span>
             ) : (
               <>✓ Үлдэгдэл: {selectedStock} ширхэг</>
             )}

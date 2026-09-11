@@ -58,9 +58,11 @@ export default function ProductCard({ p }: { p: PublicProduct }) {
     ? comingSoonDaysLeft
       ? `ТУН УДАХГҮЙ · ${comingSoonDaysLeft} ХОНОГ`
       : "ТУН УДАХГҮЙ"
-    : madeToOrder
-      ? "ЗАХИАЛГААР ИРНЭ"
-      : p.salePrice
+    : soldOut
+      ? "SOLD OUT · ЗАХИАЛГААР ИРНЭ"
+      : p.isMadeToOrder
+        ? "ЗАХИАЛГААР ИРНЭ"
+        : p.salePrice
         ? "SALE"
         : p.isBestSeller
           ? "BESTSELLER"
